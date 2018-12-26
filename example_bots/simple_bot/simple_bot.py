@@ -4,6 +4,11 @@ from rlbot.utils.structures.game_data_struct import GameTickPacket
 import math
 
 class SimpleBot(BaseAgent):
+    """
+    A simple always-towards-ball-agent.
+    This bot has a deliberate weakness that when facing
+    exactly away from the ball, it does not turn to face the ball.
+    """
 
     def get_output(self, game_tick_packet: GameTickPacket) -> SimpleControllerState:
         # Get the direction to the ball
