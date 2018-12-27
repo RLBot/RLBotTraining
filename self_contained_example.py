@@ -100,8 +100,8 @@ def main():
         'MoveToBall(01 When Facing towards ball)': MoveToBall(Vector3(-1500, 0, 0)),  # This one is expected to fail
         # These ones below are expected to fail.
         'MoveToBall(02 When Facing away from ball)': MoveToBall(Vector3(1500, 0, 0)),  # This one is expected to fail
-        'MoveBrickToBall(From enemy side)': MoveBrickToBall(Vector3(0, 4500, 0)),
-        'MoveBrickToBall(From own side)': MoveBrickToBall(Vector3(0, -4500, 0)),
+        'MoveBrickToBall(From enemy side)': MoveBrickToBall(Vector3(0, 1500, 0)),
+        'MoveBrickToBall(From own side)': MoveBrickToBall(Vector3(0, -1500, 0)),
     })
 
     # Note: results is an iterator, not a list. We can only do this for-loop once.
