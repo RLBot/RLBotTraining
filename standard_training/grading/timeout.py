@@ -1,7 +1,7 @@
 from typing import Any, Mapping, Optional
 from functools import reduce
 
-from rlbot.training.training import Exercise, Pass, Fail, Grade
+from rlbot.training.training import Pass, Fail, Grade
 from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
 
 from . import Grader
@@ -10,7 +10,10 @@ class FailOnTimeout(Grader):
     """Fails the exercise if we take too long."""
 
     class FailDueToTimeout(Fail):
-        pass
+        def __init__(self, max_duration_seconds):
+            self.max_duration_seconds = max_duration_seconds
+        def __repr__(self):
+            return f'{super().__repr__()}: Timeout: Took longer than {self.max_duration_seconds} seconds.'
 
     def __init__(self, max_duration_seconds: float):
         self.max_duration_seconds = max_duration_seconds
@@ -23,7 +26,7 @@ class FailOnTimeout(Grader):
             self.initial_seconds_elapsed = seconds_elapsed
         self.measured_duration_seconds = seconds_elapsed - self.initial_seconds_elapsed
         if self.measured_duration_seconds > self.max_duration_seconds:
-            return self.FailDueToTimeout()
+            return self.FailDueToTimeout(self.max_duration_seconds)
 
     def get_metrics(self) -> Mapping[str, Any]:
         return {

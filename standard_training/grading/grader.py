@@ -1,8 +1,11 @@
 from typing import Any, Mapping, Optional
 from functools import reduce
+import random
 
-from rlbot.training.training import Exercise, Pass, Fail, Grade
-from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
+from rlbot.training.training import Grade, Exercise
+from rlbot.utils.game_state_util import GameState
+from rlbot.utils.structures.game_data_struct import GameTickPacket
+
 
 class Grader():
     """
@@ -16,20 +19,21 @@ class Grader():
     def get_metrics(self) -> Mapping[str, Any]:
         return {}  # No metrics by default
 
-def pick_more_significant_grade(a:Optional[Grade], b:Optional[Grade]) -> Optional[Grade]:
+class GraderExercise(Exercise):
     """
-    Chooses to return @a or @b based on some measure of sigificance.
-    On equal significance, it favours @a.
+    The usuall base-class for Exercises in this repo.
+    Only requires users of this class to specify constructur arguments
+    and implement setup().
     """
-    if isinstance(a, Fail):
-        return a
-    elif isinstance(b, Fail):
-        return b
-    elif isinstance(a, Pass):
-        return a
-    elif isinstance(b, Pass):
-        return b
-    # Check assumptions that were made when writing this function
-    assert a is None
-    assert b is None
-    return None
+    def __init__(self, config_path:str, grader: Grader):
+        self.config_path = config_path
+        self.grader = grader
+
+    def on_tick(self, game_tick_packet):
+        return self.grader.on_tick(game_tick_packet)
+
+    def get_config_path(self) -> str:
+        return self.config_path
+
+    def setup(self, rng: random.Random) -> GameState:
+        raise NotImplementedError()

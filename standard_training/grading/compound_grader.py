@@ -2,8 +2,10 @@ from typing import Any, Mapping, Optional
 from functools import reduce
 
 from rlbot.training.training import Exercise, Pass, Fail, Grade
-from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
-from .grader import Grader
+from rlbot.utils.structures.game_data_struct import GameTickPacket
+
+from . import Grader
+
 
 class CompoundGrader(Grader):
     """
@@ -38,7 +40,6 @@ def pick_more_significant_grade(a:Optional[Grade], b:Optional[Grade]) -> Optiona
         return a
     elif isinstance(b, Pass):
         return b
-    # Check assumptions that were made when writing this function
-    assert a is None
-    assert b is None
+    assert a is None, f'{type(a)} must inherit either from Pass or Fail'
+    assert b is None, f'{type(b)} must inherit either from Pass or Fail'
     return None

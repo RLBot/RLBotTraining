@@ -1,12 +1,12 @@
 import unittest
 
-from rlbot.training.training import Exercise, Pass, Fail, Grade
+from rlbot.training.training import Pass, Fail, Grade
 from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
-from grading import Grader, CompoundGrader, FailOnTimeout
+from grading import Grader, GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, PlayerEventType
 
 class GradingTest(unittest.TestCase):
 
-    def test_ten(self):
+    def test_timeout_ten(self):
         ex = TimeoutExercise()
         self.assertIsNone(ex.on_tick(packet_with_time(10)))
         self.assertIsNone(ex.on_tick(packet_with_time(13.2)))
@@ -14,7 +14,7 @@ class GradingTest(unittest.TestCase):
         self.assertIsNotNone(fail_timeout)
         self.assertIsInstance(fail_timeout, FailOnTimeout.FailDueToTimeout)
 
-    def test_twenty_with_metrics(self):
+    def test_timeout_twenty_with_metrics(self):
         ex = TimeoutExercise()
         self.assertIsNone(ex.on_tick(packet_with_time(20)))
         self.assertIsNone(ex.on_tick(packet_with_time(23.2)))
@@ -30,14 +30,30 @@ class GradingTest(unittest.TestCase):
             }
         })
 
-class TimeoutExercise(Exercise):
-    def __init__(self):
-        self.grader = CompoundGrader({
-            'timeout': FailOnTimeout(3.5)
-        })
+    def test_player_events(self):
+        detector = PlayerEventDetector()
+        gtp = GameTickPacket()
+        gtp.game_info.seconds_elapsed = 14.
+        gtp.num_cars = 2
+        gtp.game_cars[1].score_info.goals = 3
+        self.assertListEqual(detector.detect_events(gtp), [])
+        self.assertListEqual(detector.detect_events(gtp), [])
+        gtp = GameTickPacket()
+        gtp.game_info.seconds_elapsed = 15.
+        gtp.num_cars = 2
+        gtp.game_cars[1].score_info.goals = 5
+        self.assertListEqual(detector.detect_events(gtp), [PlayerEvent(
+            type=PlayerEventType.GOALS,
+            player=gtp.game_cars[1],
+            seconds_elapsed=15.,
+        )])
+        self.assertListEqual(detector.detect_events(gtp), [])
 
-    def on_tick(self, game_tick_packet):
-        return self.grader.on_tick(game_tick_packet)
+class TimeoutExercise(GraderExercise):
+    def __init__(self):
+        super().__init__('', CompoundGrader({
+            'timeout': FailOnTimeout(3.5)
+        }))
 
 def packet_with_time(time:float) -> GameTickPacket:
     return GameTickPacket(game_info=GameInfo(seconds_elapsed=time))
