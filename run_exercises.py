@@ -8,9 +8,7 @@ def run_easy_exercises():
     run_exercises({
         'BallInFrontOfGoal': BallInFrontOfGoal(config_path),
         'BallInFrontOfGoal2': BallInFrontOfGoal(config_path),
-        'BallInFrontOfGoal3': BallInFrontOfGoal(config_path),
-        # TODO: implement looping exercises
-    })
+    }, infinite=True)
 
 if __name__ == '__main__':
     run_easy_exercises()
