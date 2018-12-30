@@ -2,9 +2,9 @@ import copy
 from typing import List, Optional
 
 from rlbot.training.training import Exercise, Pass, Fail, Grade
-from rlbot.utils.structures.game_data_struct import GameTickPacket, Touch
+from rlbot.utils.structures.game_data_struct import Touch
 
-from . import Grader
+from . import Grader, TrainingTickPacket
 
 
 class RecordBallTouches(Grader):
@@ -13,12 +13,12 @@ class RecordBallTouches(Grader):
         self.touches: List[Touch] = []
         self.initial_seconds_elapsed: float = None
 
-    def on_tick(self, game_tick_packet: GameTickPacket) -> Optional[Grade]:
+    def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
         if self.initial_seconds_elapsed is None:
             self.initial_seconds_elapsed = game_tick_packet.game_info.seconds_elapsed
 
         # Record the touch only if it is new and happened while we were grading.
-        latest_touch = game_tick_packet.game_ball.latest_touch
+        latest_touch = tick.game_tick_packet.game_ball.latest_touch
         if latest_touch.time_seconds < self.initial_seconds_elapsed:
             return
         if self.touches and latest_touch.time_seconds == self.touches[-1]:

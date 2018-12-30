@@ -4,7 +4,8 @@ from typing import List
 
 from rlbot.training.training import Pass, Fail, Grade
 from rlbot.utils.structures.game_data_struct import GameTickPacket, ScoreInfo
-from . import Grader, CompoundGrader, FailOnTimeout, PlayerEvent, PlayerEventType, PlayerEventDetector
+
+from . import Grader, CompoundGrader, FailOnTimeout, PlayerEventType, TrainingTickPacket
 
 
 class StrikerGrader(CompoundGrader):
@@ -35,11 +36,10 @@ class PassOnGoalForAllyTeam(Grader):
         """
         :param ally_team: number equal to game_datastruct.PlayerInfo.team.
         """
-        self.detector = PlayerEventDetector()
         self.ally_team = ally_team
 
-    def on_tick(self, game_tick_packet):
-        for event in self.detector.detect_events(game_tick_packet):
+    def on_tick(self, tick: TrainingTickPacket):
+        for event in tick.player_events:
             if event.type == PlayerEventType.GOALS:
                 if event.player.team == self.ally_team:
                     return Pass()

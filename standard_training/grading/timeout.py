@@ -2,9 +2,8 @@ from typing import Any, Mapping, Optional
 from functools import reduce
 
 from rlbot.training.training import Pass, Fail, Grade
-from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
 
-from . import Grader
+from . import Grader, TrainingTickPacket
 
 class FailOnTimeout(Grader):
     """Fails the exercise if we take too long."""
@@ -20,8 +19,8 @@ class FailOnTimeout(Grader):
         self.initial_seconds_elapsed: float = None
         self.measured_duration_seconds: float = None
 
-    def on_tick(self, game_tick_packet: GameTickPacket) -> Optional[Grade]:
-        seconds_elapsed = game_tick_packet.game_info.seconds_elapsed
+    def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
+        seconds_elapsed = tick.game_tick_packet.game_info.seconds_elapsed
         if self.initial_seconds_elapsed is None:
             self.initial_seconds_elapsed = seconds_elapsed
         self.measured_duration_seconds = seconds_elapsed - self.initial_seconds_elapsed

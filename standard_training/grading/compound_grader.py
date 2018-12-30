@@ -2,9 +2,8 @@ from typing import Any, Mapping, Optional
 from functools import reduce
 
 from rlbot.training.training import Exercise, Pass, Fail, Grade
-from rlbot.utils.structures.game_data_struct import GameTickPacket
 
-from . import Grader
+from . import Grader, TrainingTickPacket
 
 
 class CompoundGrader(Grader):
@@ -16,8 +15,8 @@ class CompoundGrader(Grader):
     def __init__(self, graders: Mapping[str, Grader]):
         self.graders = graders
 
-    def on_tick(self, game_tick_packet: GameTickPacket) -> Optional[Grade]:
-        grades = [ grader.on_tick(game_tick_packet) for grader in self.graders.values()]
+    def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
+        grades = [ grader.on_tick(tick) for grader in self.graders.values()]
         return reduce(pick_more_significant_grade, grades, None)
 
     def get_metrics(self) -> Mapping[str, Any]:
