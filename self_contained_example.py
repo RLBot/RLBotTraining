@@ -36,6 +36,7 @@ class MoveToBall(Exercise):
         self.player_rotation = player_rotation
         self.ball_location = ball_location
         self.timeout_seconds = timeout_seconds
+        # These variables must be reset in setup() for repeated runs.
         self.init_dist_to_ball = None
         self.init_game_seconds = None
 
@@ -43,6 +44,8 @@ class MoveToBall(Exercise):
         return join(dirname(__file__), 'rlbot_configs', 'single_soccar.cfg')
 
     def setup(self, rng: random.Random) -> GameState:
+        self.init_dist_to_ball = None
+        self.init_game_seconds = None
         return GameState(
             ball=BallState(physics=Physics(
                 location=self.ball_location,

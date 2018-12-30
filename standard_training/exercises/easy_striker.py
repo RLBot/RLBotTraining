@@ -2,14 +2,11 @@ import random
 from math import pi
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
-from ..grading import GraderExercise, StrikerGrader
+from ..grading import GraderExercise, StrikerGrader, Grader
 
 class BallInFrontOfGoal(GraderExercise):
 
-    def __init__(self, config_path:str):
-        super().__init__(config_path, StrikerGrader())
-
-    def setup(self, rng: random.Random) -> GameState:
+    def make_game_state(self, rng: random.Random) -> GameState:
         return GameState(
             ball=BallState(physics=Physics(
                 location=Vector3(0, 4400, 100),
@@ -28,3 +25,6 @@ class BallInFrontOfGoal(GraderExercise):
             },
             boosts={i: BoostState(0) for i in range(34)},
         )
+
+    def make_grader(self) -> Grader:
+        return StrikerGrader()
