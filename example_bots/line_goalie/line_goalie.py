@@ -56,23 +56,18 @@ class LineGoalie(BaseAgent):
             return
 
         self.renderer.begin_rendering('prediction')
-        colors = [
-            self.renderer.create_color(255, 255, 100, 100),
-            self.renderer.create_color(255, 255, 255, 100),
-            self.renderer.create_color(255, 100, 255, 100),
-            self.renderer.create_color(255, 100, 255, 255),
-            self.renderer.create_color(255, 100, 100, 255),
-            self.renderer.create_color(255, 255, 100, 255)
-        ]
-        for i in range(0, ball_prediction.num_slices):
-            current_slice = ball_prediction.slices[i].physics.location
-            self.renderer.draw_rect_3d(current_slice, 8, 8, True, colors[i % len(colors)], True)
+        def get_color(i):
+            colors = [
+                self.renderer.create_color(255, 255, 100, 100),
+                self.renderer.create_color(255, 255, 255, 100),
+                self.renderer.create_color(255, 100, 255, 100),
+                self.renderer.create_color(255, 100, 255, 255),
+                self.renderer.create_color(255, 100, 100, 255),
+                self.renderer.create_color(255, 255, 100, 255)
+            ]
+            return colors[i % len(colors)]
+        step_size = 2
+        for i in range(0, ball_prediction.num_slices, step_size):
+            current_slice = ball_prediction.slices[i*step_size].physics.location
+            self.renderer.draw_rect_3d(current_slice, 8, 8, True, get_color(i), True)
         self.renderer.end_rendering()
-
-
-
-if __name__ == '__main__':
-    # run_easy_exercises()
-    # run_some_bakkesmod_exercises()
-    agent = LineGoalie('name', 0, 0)
-    print(agent.get_output(GameTickPacket()))
