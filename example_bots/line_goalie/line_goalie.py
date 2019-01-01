@@ -1,7 +1,18 @@
+from typing import Tuple
+from enum import Enum
+
 from rlbot.agents.base_agent import BaseAgent, SimpleControllerState
 from rlbot.utils.structures.game_data_struct import GameTickPacket
 
-import math
+from math import tau
+
+def zero_centered_angle(theta:float) -> float:
+    while theta > tau/2:
+        theta -= tau
+    return theta
+
+def clamp(x, minimum=0, maximum=1):
+    return min(maximum, max(minimum, x))
 
 class LineGoalie(BaseAgent):
     """
@@ -16,44 +27,60 @@ class LineGoalie(BaseAgent):
     MAX_Z = 800
     MIN_Z = 0
 
+    class State(Enum):
+        GROUND = 1
+
     def get_output(self, game_tick_packet: GameTickPacket) -> SimpleControllerState:
-        # Get the direction to the ball
-        # car_obj = game_tick_packet.game_cars[self.index]
-        # car = car_obj.physics
-        # ball = game_tick_packet.game_ball.physics
-        # if ball.velocity.z == 0:
-        #     # Not moving towards to goal - no need to do stuff, right?
-        #     return SimpleControllerState()
-        # time_to_intercept = (car.location.y - ball.location.y) / ball.velocity.y
 
-        # # A better bot would apply gravity and better ball physics in general.
-        # # TODO: use RLBot ball prediction
-        # intercept_x = ball.location.x + ball.velocity.x * time_to_intercept
-        # intercept_x = min(self.MAX_X, max(self.MIN_X, intercept_x))
-        # intercept_z = ball.location.z + ball.velocity.z * time_to_intercept
-        # intercept_z = min(self.MAX_Z, max(self.MIN_Z, intercept_z))
+        # Find the time/position where we should intercept the ball.
+        car_obj = game_tick_packet.game_cars[self.index]
+        car = car_obj.physics
+        prediction_struct = self.get_ball_prediction_struct()
+        ball_intercept = prediction_struct.slices[0]
+        car_y = car.location.y
+        for i, next_intercept in zip(range(prediction_struct.num_slices), prediction_struct.slices):
+            if (
+                abs(next_intercept.physics.location.y - car_y) <
+                abs(ball_intercept.physics.location.y - car_y)
+            ):
+                ball_intercept = next_intercept
+            else:
+                # Do not search further: we do not care about backboard bounces which might come closer.
+                break
 
-        # # How is the car aligned with the direction to the ball?
-        # yaw = float(car.physics.rotation.yaw)
-        # car_forward_x = -math.sin(yaw)
-        # car_left_y = math.cos(yaw)
-        # dot_product = to_ball_x*car_left_x + to_ball_y*car_left_y
-        self.render_ball_prediction()
 
-        # Act on the information above.
+        state = self.State.GROUND # TODO
+
         controller_state = SimpleControllerState()
+        if state == self.State.GROUND:
+            controller_state.throttle = (
+                # PD-controller
+                1.0 * (next_intercept.physics.location.x - car.location.x) +
+                0.3 * (0 - car.velocity.x)
+            )
+            controller_state.boost = controller_state.throttle > 200.
+
+            car_yaw = zero_centered_angle(car.rotation.yaw)
+            car_yaw_vel = car.angular_velocity.z
+            controller_state.steer = (
+                # PD-controller
+                1.0 * (0 - car_yaw) +
+                0.1 * (0 - car_yaw_vel)
+            )
+            if controller_state.throttle < 1:
+                controller_state.steer *= -1
+
+            controller_state.throttle = clamp(controller_state.throttle, -1, 1)
+            controller_state.steer = clamp(controller_state.steer, -1, 1)
+
+        else:
+            self.logger.warn(f'invalid state {state}')
         # controller_state.throttle = 1.0
         # controller_state.steer = min(1, max(-1, 5 * dot_product))
-        # controller_state.boost = abs(dot_product) < .1
         # controller_state.handbrake = abs(dot_product) > .9
         return controller_state
 
-    def render_ball_prediction(self):
-        ball_prediction = self.get_ball_prediction_struct()
-
-        if ball_prediction is None:
-            print ('no ball pred')
-            return
+    def render_ball_prediction(self, ball_prediction):
 
         self.renderer.begin_rendering('prediction')
         def get_color(i):
