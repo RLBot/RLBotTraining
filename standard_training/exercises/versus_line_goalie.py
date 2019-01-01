@@ -7,10 +7,11 @@ from ..grading import GraderExercise, GoalieGrader, Grader
 class VersusLineGoalie(GraderExercise):
 
     def make_game_state(self, rng: random.Random) -> GameState:
+        vel_mul = rng.uniform(1.0, 2.1)
         return GameState(
             ball=BallState(physics=Physics(
                 location=Vector3(0, -1500, 100),
-                velocity=Vector3(500 * rng.uniform(-1, 1), -2000, 0),
+                velocity=Vector3(vel_mul * 480 * rng.uniform(-1, 1), vel_mul* -2000, 0),
                 angular_velocity=Vector3(0,0,0))),
             cars={
                 # Goalie
@@ -20,8 +21,8 @@ class VersusLineGoalie(GraderExercise):
                         rotation=Rotator(0, rng.uniform(-.1, .1), 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
-                    jumped=False,
-                    double_jumped=False,
+                    jumped=True,
+                    double_jumped=True,
                     boost_amount=100),
                 # Striker
                 1: CarState(
