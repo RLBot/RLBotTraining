@@ -9,8 +9,8 @@ class VersusLineGoalie(GraderExercise):
     def make_game_state(self, rng: random.Random) -> GameState:
         return GameState(
             ball=BallState(physics=Physics(
-                location=Vector3(rng.uniform(-840, 840), -1500, 100),
-                velocity=Vector3(0, -2000, 0),
+                location=Vector3(0, -1500, 100),
+                velocity=Vector3(500 * rng.uniform(-1, 1), -2000, 0),
                 angular_velocity=Vector3(0,0,0))),
             cars={
                 # Goalie
