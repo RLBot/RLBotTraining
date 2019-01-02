@@ -1,11 +1,13 @@
+import ctypes
 from typing import Tuple
 from enum import Enum
 from collections import deque, Counter
+from contextlib import contextmanager
 
 
 from rlbot.agents.base_agent import BaseAgent, SimpleControllerState
 from rlbot.utils.structures.ball_prediction_struct import BallPrediction, Slice as BallPredictionSlice
-from rlbot.utils.structures.game_data_struct import GameTickPacket
+from rlbot.utils.structures.game_data_struct import GameTickPacket, Vector3
 
 from math import tau, sin, cos, tan, copysign, sqrt
 
@@ -16,6 +18,54 @@ def zero_centered_angle(theta:float) -> float:
 
 def clamp(x, minimum=0, maximum=1):
     return min(maximum, max(minimum, x))
+
+def distance(a: Vector3, b: Vector3):
+    """
+    Returns the euclidian distance between @a and @b
+    TODO: use a shared library for this.
+    """
+    return sqrt(
+        (a.x - b.x)**2 +
+        (a.y - b.y)**2 +
+        (a.z - b.z)**2
+    )
+
+def obj_distance(a, b):
+    """
+    Returns the distance between two objects which have a "physics" (type Physics) property.
+    """
+    return distance(a.physics.location, b.physics.location)
+
+class StateDiscontinuityDetector:
+
+    # https://youtu.be/0qw1xFv7Sv0
+    MAX_PLAUSIBLE_BALL_SPEED = 15000 # uu/s
+
+    def __init__(self):
+        self.prev_tick_packet = None
+    def is_discontinuous(self, game_tick_packet: GameTickPacket) -> bool:
+        """
+        Returns true iff it is implausible that we arrived at the current
+        game_tick_packet by just waiting.
+        Compares to the last time this function has been called.
+        """
+        with self._update_prev_on_return(game_tick_packet):
+            if self.prev_tick_packet is None:
+                self.prev_tick_packet = GameTickPacket()
+                return False # Be on the safe side - On the first tick things are ok.
+            dt = game_tick_packet.game_info.seconds_elapsed - self.prev_tick_packet.game_info.seconds_elapsed
+            if dt == 0:
+                return False
+            ball_dist = obj_distance(game_tick_packet.game_ball, self.prev_tick_packet.game_ball)
+            ball_speed = ball_dist / dt
+            # TODO: detect it on other things as well. e.g. cars, gametime.
+            return ball_speed > self.MAX_PLAUSIBLE_BALL_SPEED
+
+    @contextmanager
+    def _update_prev_on_return(self, game_tick_packet: GameTickPacket):
+        yield  # body of `with` statement
+        ctypes.pointer(self.prev_tick_packet)[0] = game_tick_packet  # make a copy with memcpy
+
 
 class LineGoalie(BaseAgent):
     """
@@ -36,6 +86,8 @@ class LineGoalie(BaseAgent):
     JUMP_BEFORE_INTERCEPT_SECONDS = .55
     DODGE_BEFORE_INTERCEPT_SECONDS = .45
 
+    HEIGHT_BEFORE_DODGING = 50
+
 
     class State(Enum):
         GROUND = 1
@@ -44,13 +96,19 @@ class LineGoalie(BaseAgent):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.reset_detector = StateDiscontinuityDetector()
+        self.reset_state()
+
+    def reset_state(self):
+        self.ticks_in_dodge_state = 0
         # State de-noising:
-        # Two out of the last 3 states (including the current state) must
         self.state_history = deque([self.State.GROUND] * 5)
         self.state_history_counter = Counter(self.state_history)
-        self.ticks_in_dodge_state = 0
 
     def get_output(self, game_tick_packet: GameTickPacket) -> SimpleControllerState:
+
+        if self.reset_detector.is_discontinuous(game_tick_packet):
+            self.reset_state()
 
         car_obj = game_tick_packet.game_cars[self.index]
         car = car_obj.physics
@@ -86,11 +144,10 @@ class LineGoalie(BaseAgent):
             else:
                 state = self.State.GROUND
         else:
-            if seconds_until_intercept < self.DODGE_BEFORE_INTERCEPT_SECONDS:
-                state = self.State.DODGING
-            else:
+            if car.location.z <= self.HEIGHT_BEFORE_DODGING:
                 state = self.State.JUMPING
-            state = self.State.DODGING
+            else:
+                state = self.State.DODGING
 
         assert state
 
@@ -126,16 +183,15 @@ class LineGoalie(BaseAgent):
             )
             if controller_state.throttle < 1:
                 controller_state.steer *= -1
-
         elif state == self.State.JUMPING:
             controller_state.jump = True
         elif state == self.State.DODGING:
             self.ticks_in_dodge_state += 1
-            if self.ticks_in_dodge_state < 10:
+            if self.ticks_in_dodge_state < 2:
                 controller_state.jump = False
-            elif self.ticks_in_dodge_state == 12:
+            elif self.ticks_in_dodge_state == 3:
                 controller_state.roll = 1
-                controller_state.pitch = -0.005*forward_adjust
+                controller_state.pitch = -0.008*forward_adjust
                 normalize = 1/sqrt(controller_state.roll**2 + controller_state.pitch**2)
                 controller_state.roll *= normalize
                 controller_state.pitch *= normalize
