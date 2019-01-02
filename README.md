@@ -4,8 +4,8 @@ Customizable training for Rocket Leage bots of any language.
 
 ## Instalation
 
+ - Install [RLBot](http://www.rlbot.org/)
  - Clone this repo (`RLBot/RLBotTraining`)
- - TODO(This step will be unnecessary once the branch is merged): Use the `RLBotTraining` branch of `RLBot/RLBot`)
  - `python run_exercises.py`
 
 
