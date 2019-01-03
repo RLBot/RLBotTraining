@@ -4,7 +4,7 @@ from standard_training.exercise_runner import run_exercises
 from standard_training.exercises.bakkesmod_import.bakkesmod_importer import exercises_from_bakkesmod_playlist
 from standard_training.exercises.easy_goalie import BallRollingToGoalie
 from standard_training.exercises.easy_striker import BallInFrontOfGoal, FacingAwayFromBallInFrontOfGoal
-from standard_training.exercises.versus_line_goalie import VersusLineGoalie
+from standard_training.exercises.defending import DefendingShot
 
 
 # TODO: playlists.
@@ -17,11 +17,12 @@ def run_easy_exercises():
         'Facing away from ball 2': FacingAwayFromBallInFrontOfGoal(config_path, -400.),
         'Facing away from ball 3': FacingAwayFromBallInFrontOfGoal(config_path, 0),
         'Facing away from opponents goal': FacingAwayFromBallInFrontOfGoal(config_path, 200., car_start_y=5100),
-
+        'Defending': DefendingShot(config_path),
         'BallInFrontOfGoal2': BallInFrontOfGoal(config_path),
         'BallRollingToGoalie': BallRollingToGoalie(config_path),
         'BallRollingToGoalie2': BallRollingToGoalie(config_path),
     }, infinite=True)
+
 
 def run_some_bakkesmod_exercises():
     config_path = join(dirname(__file__), 'rlbot_configs', 'single_soccar.cfg')
@@ -30,13 +31,6 @@ def run_some_bakkesmod_exercises():
     playlist_id = 'quJfnUJf22'
     exercises = exercises_from_bakkesmod_playlist(config_path, playlist_id)
 
-def run_versus_line_goalie():
-    config_path = join(dirname(__file__), 'rlbot_configs', 'versus_line_goalie.cfg')
-    run_exercises({
-        'BallRollingToGoalie': VersusLineGoalie(config_path),
-    }, infinite=True)
-
 if __name__ == '__main__':
-    # run_easy_exercises()
+    run_easy_exercises()
     # run_some_bakkesmod_exercises()
-    run_versus_line_goalie()
