@@ -1,9 +1,9 @@
 from typing import Any, Mapping, Optional
-from functools import reduce
 
 from rlbot.training.training import Pass, Fail, Grade
 
 from . import Grader, TrainingTickPacket
+
 
 class FailOnTimeout(Grader):
     """Fails the exercise if we take too long."""
@@ -11,6 +11,7 @@ class FailOnTimeout(Grader):
     class FailDueToTimeout(Fail):
         def __init__(self, max_duration_seconds):
             self.max_duration_seconds = max_duration_seconds
+
         def __repr__(self):
             return f'{super().__repr__()}: Timeout: Took longer than {self.max_duration_seconds} seconds.'
 
@@ -34,12 +35,14 @@ class FailOnTimeout(Grader):
             'measured_duration_seconds': self.measured_duration_seconds,
         }
 
+
 class PassOnTimeout(FailOnTimeout):
     """Passes the exercise if we manage not to fail until here."""
 
     class PassDueToTimeout(Pass):
         def __init__(self, max_duration_seconds):
             self.max_duration_seconds = max_duration_seconds
+
         def __repr__(self):
             return f'{super().__repr__()}: Timeout: Survived {self.max_duration_seconds} seconds.'
 

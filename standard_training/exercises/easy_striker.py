@@ -1,8 +1,10 @@
 import random
 from math import pi
+
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
 from ..grading import GraderExercise, StrikerGrader, Grader
+
 
 class BallInFrontOfGoal(GraderExercise):
 
@@ -10,13 +12,13 @@ class BallInFrontOfGoal(GraderExercise):
         return GameState(
             ball=BallState(physics=Physics(
                 location=Vector3(0, 4400, 100),
-                velocity=Vector3(0,0,0),
-                angular_velocity=Vector3(0,0,0))),
+                velocity=Vector3(0, 0, 0),
+                angular_velocity=Vector3(0, 0, 0))),
             cars={
                 0: CarState(
                     physics=Physics(
                         location=Vector3(rng.uniform(-900, 900), 3000, 0),
-                        rotation=Rotator(0, pi/2, 0),
+                        rotation=Rotator(0, pi / 2, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
                     jumped=False,
@@ -40,13 +42,13 @@ class FacingAwayFromBallInFrontOfGoal(GraderExercise):
         return GameState(
             ball=BallState(physics=Physics(
                 location=Vector3(0, 4400, 100),
-                velocity=Vector3(0,0,0),
-                angular_velocity=Vector3(0,0,0))),
+                velocity=Vector3(0, 0, 0),
+                angular_velocity=Vector3(0, 0, 0))),
             cars={
                 0: CarState(
                     physics=Physics(
                         location=Vector3(self.car_start_x, self.car_start_y, 0),
-                        rotation=Rotator(0, -pi/2, 0),
+                        rotation=Rotator(0, -pi / 2, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
                     jumped=False,

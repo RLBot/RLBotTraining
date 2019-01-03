@@ -1,6 +1,6 @@
-from os.path import join, dirname
-import random
 import math
+import random
+from os.path import join, dirname
 
 from rlbot.training.training import Pass, Fail, Exercise, run_all_exercises
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
@@ -12,8 +12,9 @@ This example deliberately does not drag in the the more complex control flow
 that is used to define most of our other tests.
 """
 
+
 class FailWithReason(Fail):
-    def __init__(self, reason:str):
+    def __init__(self, reason: str):
         self.reason = reason
 
     def __repr__(self) -> str:
@@ -49,8 +50,8 @@ class MoveToBall(Exercise):
         return GameState(
             ball=BallState(physics=Physics(
                 location=self.ball_location,
-                velocity=Vector3(0,0,0),
-                angular_velocity=Vector3(0,0,0))),
+                velocity=Vector3(0, 0, 0),
+                angular_velocity=Vector3(0, 0, 0))),
             cars={
                 0: CarState(
                     physics=Physics(
@@ -70,7 +71,7 @@ class MoveToBall(Exercise):
         ball_pos = game_tick_packet.game_ball.physics.location
         to_ball_x = ball_pos.x - car_pos.x
         to_ball_y = ball_pos.y - car_pos.y
-        dist_to_ball = math.sqrt(to_ball_x**2 + to_ball_y**2)
+        dist_to_ball = math.sqrt(to_ball_x ** 2 + to_ball_y ** 2)
 
         # Did we drive to the ball?
         if self.init_dist_to_ball is None:
@@ -87,8 +88,10 @@ class MoveToBall(Exercise):
         if seconds_elapsed - self.init_game_seconds > self.timeout_seconds:
             return FailWithReason(f"Hit the timout of {self.timeout_seconds} seconds")
 
+
 class MoveBrickToBall(MoveToBall):
     """ Same as MoveToBall but now tests brickbot instead. """
+
     def get_config_path(self) -> str:
         return join(dirname(__file__), 'rlbot_configs', 'single_soccar_brick_bot.cfg')
 
@@ -117,7 +120,8 @@ def main():
     if num_failed:
         print(f'{num_failed} exercises have been failed.')
     else:
-        print('All excercises have been passed!')
+        print('All exercises have been passed!')
+
 
 if __name__ == '__main__':
     main()
