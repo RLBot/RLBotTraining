@@ -1,8 +1,9 @@
 import unittest
 
-from rlbot.training.training import Pass, Fail, Grade
 from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
-from grading import Grader, GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, PlayerEventType
+
+from .grading import GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, PlayerEventType
+
 
 class GradingTest(unittest.TestCase):
 
@@ -49,15 +50,16 @@ class GradingTest(unittest.TestCase):
         )])
         self.assertListEqual(detector.detect_events(gtp), [])
 
+
 class TimeoutExercise(GraderExercise):
     def __init__(self):
-        super().__init__('', CompoundGrader({
+        super().__init__(CompoundGrader({
             'timeout': FailOnTimeout(3.5)
         }))
 
-def packet_with_time(time:float) -> GameTickPacket:
-    return GameTickPacket(game_info=GameInfo(seconds_elapsed=time))
 
+def packet_with_time(time: float) -> GameTickPacket:
+    return GameTickPacket(game_info=GameInfo(seconds_elapsed=time))
 
 
 if __name__ == '__main__':

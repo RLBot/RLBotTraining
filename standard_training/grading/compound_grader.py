@@ -1,7 +1,7 @@
-from typing import Any, Mapping, Optional
 from functools import reduce
+from typing import Any, Mapping, Optional
 
-from rlbot.training.training import Exercise, Pass, Fail, Grade
+from rlbot.training.training import Pass, Fail, Grade
 
 from . import Grader, TrainingTickPacket
 
@@ -16,7 +16,7 @@ class CompoundGrader(Grader):
         self.graders = graders
 
     def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
-        grades = [ grader.on_tick(tick) for grader in self.graders.values()]
+        grades = [grader.on_tick(tick) for grader in self.graders.values()]
         return reduce(pick_more_significant_grade, grades, None)
 
     def get_metrics(self) -> Mapping[str, Any]:
@@ -26,7 +26,7 @@ class CompoundGrader(Grader):
         }
 
 
-def pick_more_significant_grade(a:Optional[Grade], b:Optional[Grade]) -> Optional[Grade]:
+def pick_more_significant_grade(a: Optional[Grade], b: Optional[Grade]) -> Optional[Grade]:
     """
     Chooses to return @a or @b based on some measure of sigificance.
     On equal significance, it favours @a.

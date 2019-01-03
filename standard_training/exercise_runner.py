@@ -1,23 +1,26 @@
-from typing import List
 import time
+from typing import Dict
 
-from rlbot.training.training import Pass, Fail, Exercise, run_all_exercises
-from .grading import Grader, GraderExercise, CompoundGrader, FailOnTimeout
+from rlbot.training.training import Pass, run_all_exercises
 from rlbot.utils.logging_utils import get_logger
 
+from .grading import GraderExercise
+
 LOGGER_ID = 'training'
+
 
 def infinite_seed_generator():
     yield 4
     while True:
         yield int(time.time() * 1000)
 
-def run_exercises(exercises: List[GraderExercise], infinite=False):
+
+def run_exercises(exercises: Dict[str, GraderExercise], infinite=False):
     logger = get_logger(LOGGER_ID)
 
     seeds = [4]
     if infinite:
-        logger.info('Running execises repeatedly until Ctrl+C is pressed...')
+        logger.info('Running exercises repeatedly until Ctrl+C is pressed...')
         seeds = infinite_seed_generator()
 
     result_iter = run_all_exercises(exercises, seeds=seeds)

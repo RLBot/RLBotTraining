@@ -1,32 +1,37 @@
-from typing import Any, Mapping, Optional
-from functools import reduce
 import random
+from typing import Any, Mapping, Optional, List
 
 from rlbot.training.training import Grade, Exercise, Result
 from rlbot.utils.game_state_util import GameState
 from rlbot.utils.structures.game_data_struct import GameTickPacket
 
-from . import PlayerEventDetector, PlayerEvent, PlayerEventType
+from . import PlayerEventDetector, PlayerEvent
 
-class TrainingTickPacket():
+
+class TrainingTickPacket:
     """A GameTickPacket but with extra preprocessed information."""
+
     def __init__(self):
         self.game_tick_packet: GameTickPacket = None
-        self.player_events : List[PlayerEvent] = [] # events which happened this tick.
+        self.player_events: List[PlayerEvent] = []  # events which happened this tick.
         self._player_event_detector = PlayerEventDetector()
+
     def update(self, game_tick_packet: GameTickPacket):
         self.game_tick_packet = game_tick_packet
         self.player_events = self._player_event_detector.detect_events(game_tick_packet)
 
-class Grader():
+
+class Grader:
     """
     A Grader is a part of an Exercise which judges the game states
     and makes decisions about whether to terminate.
     A Grader can optionally return implementation defined metrics.
     """
+
     def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
-        """ Similar to Exercise.on_tick() but takes a preprocessed datastructure. """
-        pass # Continue by default
+        """ Similar to Exercise.on_tick() but takes a preprocessed data structure. """
+        pass  # Continue by default
+
     def get_metrics(self) -> Mapping[str, Any]:
         return {}  # No metrics by default
 
@@ -38,8 +43,10 @@ class GraderExercise(Exercise):
         - make_game_state()
         - make_grader()
     """
-    def __init__(self, config_path:str):
-        assert type(self).setup is GraderExercise.setup, 'Must not override setup(). Override make_game_state() instead.'
+
+    def __init__(self, config_path: str):
+        assert type(
+            self).setup is GraderExercise.setup, 'Must not override setup(). Override make_game_state() instead.'
         self.config_path = config_path
         # The following ones must be re-initialized in setup() for each run of this exercise.
         self.grader: Grader = None
