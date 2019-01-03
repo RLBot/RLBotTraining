@@ -9,6 +9,14 @@ Customizable training for Rocket Leage bots of any language.
  - `python run_exercises.py`
 
 
+## Features at a glance
+
+ - Uses `RLBot` config files to support bots in any programming language
+ - Reproducable training setups with randomness
+ - Customizable Pass/Fail criteria
+ - Importing of shots/playlists from BakkesMod training
+
+
 ## Architecture
 
  - At the entry point (`run_exercises.py`) we decide which `GraderExercise` should be run and the `config_path`s define the RLBot setup to be used (which bots, which mode).
@@ -28,6 +36,7 @@ Customizable training for Rocket Leage bots of any language.
 
  - Provide playlists
  - Provide an example of striker vs goalie
+ - Changes in exercise/grader source files automatically restarts the tests
  - Allow imports from RocketLeague Training
  - Put metrics (`Grader.get_metrics()`) into a database
  - A way of browsing past runs, including metrics

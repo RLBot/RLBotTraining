@@ -1,14 +1,20 @@
+import random
 import unittest
 
 from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
+from rlbot.utils.game_state_util import GameState
 
-from .grading import GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, PlayerEventType
+from grading import Grader, GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, PlayerEventType
 
+"""
+This file is a unit test for the grading module which does not require RocketLeague to run.
+"""
 
 class GradingTest(unittest.TestCase):
 
     def test_timeout_ten(self):
-        ex = TimeoutExercise()
+        ex = TimeoutExercise('')
+        ex.setup(random.Random(7))
         self.assertIsNone(ex.on_tick(packet_with_time(10)))
         self.assertIsNone(ex.on_tick(packet_with_time(13.2)))
         fail_timeout = ex.on_tick(packet_with_time(13.75))
@@ -16,7 +22,8 @@ class GradingTest(unittest.TestCase):
         self.assertIsInstance(fail_timeout, FailOnTimeout.FailDueToTimeout)
 
     def test_timeout_twenty_with_metrics(self):
-        ex = TimeoutExercise()
+        ex = TimeoutExercise('')
+        ex.setup(random.Random(7))
         self.assertIsNone(ex.on_tick(packet_with_time(20)))
         self.assertIsNone(ex.on_tick(packet_with_time(23.2)))
         fail_timeout = ex.on_tick(packet_with_time(23.75))
@@ -52,10 +59,13 @@ class GradingTest(unittest.TestCase):
 
 
 class TimeoutExercise(GraderExercise):
-    def __init__(self):
-        super().__init__(CompoundGrader({
+    def make_game_state(self, rng: random.Random) -> GameState:
+        return GameState()
+
+    def make_grader(self) -> Grader:
+        return CompoundGrader({
             'timeout': FailOnTimeout(3.5)
-        }))
+        })
 
 
 def packet_with_time(time: float) -> GameTickPacket:

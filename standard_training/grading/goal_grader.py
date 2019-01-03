@@ -67,13 +67,22 @@ class PassOnBallGoingAwayFromGoal(Grader):
     Never returns a Fail().
     """
 
+    # Prevent false positives which might be caused by two bots touching the ball at basically the same time.
+    REQUIRED_CONSECUTIVE_TICKS = 20
+
     def __init__(self, ally_team: int):
         """
         :param ally_team: number equal to game_datastruct.PlayerInfo.team.
         """
         self.ally_team = ally_team
+        self.consequtive_good_ticks = 0
 
     def on_tick(self, tick: TrainingTickPacket):
         to_own_goal = 1 if self.ally_team == 0 else -1
         if tick.game_tick_packet.game_ball.physics.velocity.y * to_own_goal > 0:
+            self.consequtive_good_ticks += 1
+        else:
+            self.consequtive_good_ticks = 0
+
+        if self.consequtive_good_ticks >= self.REQUIRED_CONSECUTIVE_TICKS:
             return Pass()

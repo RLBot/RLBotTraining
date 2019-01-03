@@ -61,6 +61,7 @@ class GraderExercise(Exercise):
         return self.make_game_state(rng)
 
     def on_tick(self, game_tick_packet: GameTickPacket) -> Optional[Result]:
+        assert self.grader, "setup() must be called before on_tick such that self.grader is set."
         self.training_tick_packet.update(game_tick_packet)
         return self.grader.on_tick(self.training_tick_packet)
 
