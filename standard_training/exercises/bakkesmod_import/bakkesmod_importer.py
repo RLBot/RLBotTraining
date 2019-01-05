@@ -1,6 +1,6 @@
 from typing import Optional, Mapping, Any
 import urllib.request
-from os.path import join, dirname, realpath, exists
+from pathlib import Path
 import json
 import random
 
@@ -9,7 +9,7 @@ from rlbot.utils.logging_utils import get_logger
 
 from ...grading import GraderExercise, StrikerGrader, Grader
 
-cache_dir = join(dirname(realpath(__file__)), 'download_cache')
+cache_dir = Path(__file__).absolute().parent / 'download_cache'
 logger_id = 'bakkesmod_importer'
 
 # Constants for converting angles
@@ -29,8 +29,8 @@ class BakkesmodImportedExercise(GraderExercise):
         assert isinstance(self.make_game_state(random.Random()), GameState)
 
     def _get_shot_json(self, shot_id: str):
-        cache_file_path = join(cache_dir, 'shots', f'{shot_id}.json')
-        if not exists(cache_file_path):
+        cache_file_path = cache_dir / 'shots' / f'{shot_id}.json'
+        if not cache_file_path.exists():
             url = f'https://workshop.bakkesmod.com/static/shots/{shot_id}.json'
             get_logger(logger_id).info(f'Downloading: {url}')
             urllib.request.urlretrieve(url, cache_file_path)
@@ -93,8 +93,8 @@ class BakkesmodImportedExercise(GraderExercise):
         return isinstance(obj, float) or isinstance(obj, int)
 
 def exercises_from_bakkesmod_playlist(config_path:str, playlist_id: str) -> Mapping[str, BakkesmodImportedExercise]:
-    cache_file_path = join(cache_dir, 'playlists', f'{playlist_id}.json')
-    if not exists(cache_file_path):
+    cache_file_path = cache_dir / 'playlists' / f'{playlist_id}.json'
+    if not cache_file_path.exists():
         url = f'https://workshop.bakkesmod.com/maps/playlist/{playlist_id}/list'
         get_logger(logger_id).info(f'Downloading: {url}')
         urllib.request.urlretrieve(url, cache_file_path)

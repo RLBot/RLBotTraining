@@ -3,6 +3,7 @@ from typing import Optional
 from rlbot.training.training import Grade, Exercise, Result
 from rlbot.utils.game_state_util import GameState
 from rlbot.utils.structures.game_data_struct import GameTickPacket
+from pathlib import Path
 
 from . import TrainingTickPacket, Grader
 
@@ -14,7 +15,7 @@ class GraderExercise(Exercise):
         - make_grader()
     """
 
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: Path):
         assert type(self).setup is GraderExercise.setup, (
             'Must not override setup(). Override make_game_state() instead.'
         )
@@ -24,7 +25,7 @@ class GraderExercise(Exercise):
         self.training_tick_packet: TrainingTickPacket = None
 
     def get_config_path(self) -> str:
-        return self.config_path
+        return str(self.config_path)
 
     def setup(self, rng: random.Random) -> GameState:
         self.grader = self.make_grader()
