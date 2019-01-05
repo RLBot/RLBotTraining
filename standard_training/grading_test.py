@@ -1,10 +1,10 @@
 import random
 import unittest
 
-from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
+from grading import Grader, GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, \
+    PlayerEventType
 from rlbot.utils.game_state_util import GameState
-
-from grading import Grader, GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, PlayerEventType
+from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
 
 """
 This file is a unit test for the grading module which does not require RocketLeague to run.

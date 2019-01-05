@@ -1,5 +1,6 @@
 import random
 from math import pi
+from pathlib import Path
 
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
@@ -33,7 +34,7 @@ class BallInFrontOfGoal(GraderExercise):
 
 
 class FacingAwayFromBallInFrontOfGoal(GraderExercise):
-    def __init__(self, config_path, car_start_x, car_start_y=3000):
+    def __init__(self, config_path: Path, car_start_x: float, car_start_y: float = 3000):
         super().__init__(config_path)
         self.car_start_x = car_start_x
         self.car_start_y = car_start_y
@@ -51,8 +52,8 @@ class FacingAwayFromBallInFrontOfGoal(GraderExercise):
                         rotation=Rotator(0, -pi / 2, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
-                    jumped=False,
-                    double_jumped=False,
+                    jumped=True,
+                    double_jumped=True,
                     boost_amount=0)
             },
             boosts={i: BoostState(0) for i in range(34)},
