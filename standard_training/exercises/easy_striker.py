@@ -1,3 +1,4 @@
+from pathlib import Path
 import random
 from math import pi
 
@@ -33,7 +34,7 @@ class BallInFrontOfGoal(GraderExercise):
 
 
 class FacingAwayFromBallInFrontOfGoal(GraderExercise):
-    def __init__(self, config_path, car_start_x, car_start_y=3000):
+    def __init__(self, config_path: Path, car_start_x: float, car_start_y: float=3000):
         super().__init__(config_path)
         self.car_start_x = car_start_x
         self.car_start_y = car_start_y
