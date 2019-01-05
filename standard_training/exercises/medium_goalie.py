@@ -31,7 +31,7 @@ class LineSave(GraderExercise):
         car_pos = Vector3(0, 2500, 25)
         ball_pos = Vector3(0, -5000, 100)
         ball_state = BallState(Physics(location=ball_pos, velocity=Vector3(0, 0, 0)))
-        car_state = CarState(boost_amount=87, physics=Physics(location=car_pos, rotation=Rotator(0, -math.pi / 2, 0)))
+        car_state = CarState(boost_amount=87, physics=Physics(location=car_pos, rotation=Rotator(0, -pi / 2, 0)))
         enemy_car = CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
         game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
         return game_state
@@ -47,9 +47,9 @@ class TryNotToOwnGoal(GraderExercise):
         ball_pos = Vector3(0, 2000, 100)
         ball_state = BallState(Physics(location=ball_pos, velocity=Vector3(0, -1300, 0)))
         car_state = CarState(boost_amount=0, physics=Physics(location=car_pos, velocity=Vector3(0, -1000, 0),
-                                                             rotation=Rotator(0, -math.pi / 2, 0)))
+                                                             rotation=Rotator(0, -pi / 2, 0)))
         enemy_car = CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
-        game_state = GameState(ball=ball_state, cars={agent.index: car_state, (1 - agent.index): enemy_car})
+        game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
         return game_state
 
     def make_grader(self) -> Grader:
