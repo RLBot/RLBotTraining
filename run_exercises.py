@@ -5,10 +5,13 @@ from standard_training.exercises.bakkesmod_import.bakkesmod_importer import exer
 from standard_training.exercises.easy_goalie import BallRollingToGoalie
 from standard_training.exercises.easy_striker import BallInFrontOfGoal, FacingAwayFromBallInFrontOfGoal
 from standard_training.exercises.versus_line_goalie import VersusLineGoalie
-
+from standard_training.alter_config import alter_config, use_bot
 
 # TODO: playlists.
-config_dir = Path(__file__).absolute().parent / 'rlbot_configs'
+
+current_dir = Path(__file__).absolute().parent
+config_dir = current_dir / 'rlbot_configs'
+example_bot_dir = current_dir / 'example_bots'
 
 def run_easy_exercises():
     config_path = config_dir / 'single_soccar.cfg'
@@ -32,14 +35,32 @@ def run_some_bakkesmod_exercises():
     exercises = exercises_from_bakkesmod_playlist(config_path, playlist_id)
     run_exercises(exercises, infinite=True)
 
-
 def run_versus_line_goalie():
     config_path = config_dir / 'versus_line_goalie.cfg'
     run_exercises({
         'BallRollingToGoalie': VersusLineGoalie(config_path),
     }, infinite=True)
 
+def run_with_bot_substitution():
+    """
+    This example demonstrates how to switch configs for an existing
+    config. We begin by using the brick bot config and substituting simple_bot.
+    """
+    original_config_path = config_dir / 'single_soccar_brick_bot.cfg'
+    with alter_config(
+        original_config_path,
+        use_bot(example_bot_dir / 'simple_bot' / 'simple_bot.cfg')
+    ) as config_path:
+        run_exercises({
+            'Facing away x=-400 (brick_bot)': FacingAwayFromBallInFrontOfGoal(original_config_path, -400.),
+            'Facing away x=1500 (brick_bot)': FacingAwayFromBallInFrontOfGoal(original_config_path, 1500.),
+            'Facing away x=-400 (simple_bot)': FacingAwayFromBallInFrontOfGoal(config_path, -400.),
+            'Facing away x=1500 (simple_bot)': FacingAwayFromBallInFrontOfGoal(config_path, 1500.),
+        }, infinite=True)
+
+
 if __name__ == '__main__':
     run_easy_exercises()
     # run_some_bakkesmod_exercises()
     # run_versus_line_goalie()
+    # run_with_bot_substitution()
