@@ -68,7 +68,8 @@ class RollingTowardsGoalShot(GraderExercise):
         car_pos = Vector3(0, -2500, 25)
         ball_pos = Vector3(random.uniform(-1000, 1000), random.uniform(0, 1500), 100)
         ball_state = BallState(Physics(location=ball_pos, velocity=Vector3(0, 550, 0)))
-        car_state = CarState(boost_amount=87, physics=Physics(location=car_pos, rotation=Rotator(0, pi / 2, 0)))
+        car_state = CarState(boost_amount=87, jumped=True, double_jumped=True,
+                             physics=Physics(location=car_pos, rotation=Rotator(0, pi / 2, 0)))
         enemy_car = CarState(physics=Physics(location=Vector3(0, 5120, 25)))
         game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
         return game_state
