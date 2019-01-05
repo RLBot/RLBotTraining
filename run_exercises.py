@@ -3,9 +3,10 @@ from os.path import join, dirname
 from standard_training.exercise_runner import run_exercises
 from standard_training.exercises.bakkesmod_import.bakkesmod_importer import exercises_from_bakkesmod_playlist
 from standard_training.exercises.easy_goalie import BallRollingToGoalie
-from standard_training.exercises.easy_striker import BallInFrontOfGoal, FacingAwayFromBallInFrontOfGoal
-from standard_training.exercises.defending import DefendingShot
-
+from standard_training.exercises.easy_striker import BallInFrontOfGoal, FacingAwayFromBallInFrontOfGoal, RollingTowardsGoalShot
+from standard_training.exercises.medium_goalie import DefendBallRollingTowardsGoal, LineSave, TryNotToOwnGoal
+from standard_training.exercises.medium_striker import HookShot
+from standard_training.exercises.dribbling import Dribbling
 
 # TODO: playlists.
 
@@ -17,10 +18,15 @@ def run_easy_exercises():
         'Facing away from ball 2': FacingAwayFromBallInFrontOfGoal(config_path, -400.),
         'Facing away from ball 3': FacingAwayFromBallInFrontOfGoal(config_path, 0),
         'Facing away from opponents goal': FacingAwayFromBallInFrontOfGoal(config_path, 200., car_start_y=5100),
-        'Defending': DefendingShot(config_path),
+        'Defending': DefendBallRollingTowardsGoal(config_path),
+        'Rolling Shot': RollingTowardsGoalShot(config_path),
+        'Hook Shot': HookShot(config_path),
+        'Dribbling': Dribbling(config_path),
         'BallInFrontOfGoal2': BallInFrontOfGoal(config_path),
         'BallRollingToGoalie': BallRollingToGoalie(config_path),
         'BallRollingToGoalie2': BallRollingToGoalie(config_path),
+        'Line Save': LineSave(config_path),
+        'Try Not To Own Goal': TryNotToOwnGoal(config_path)
     }, infinite=True)
 
 
