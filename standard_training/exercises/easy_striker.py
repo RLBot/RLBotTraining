@@ -63,6 +63,7 @@ class FacingAwayFromBallInFrontOfGoal(GraderExercise):
         return StrikerGrader()
 
 
+# The ball is rolling towards goal but you still need to put it in
 class RollingTowardsGoalShot(GraderExercise):
 
     def make_game_state(self, rng: random.Random) -> GameState:

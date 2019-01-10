@@ -6,6 +6,7 @@ from rlbot.utils.game_state_util import GameState, BallState, CarState, Physics,
 from ..grading import GraderExercise, StrikerGrader, Grader
 
 
+# The ball gets placed above you, all you need to do is dribble it in
 class Dribbling(GraderExercise):
 
     def make_game_state(self, rng: random.Random) -> GameState:

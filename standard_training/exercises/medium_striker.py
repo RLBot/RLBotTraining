@@ -6,6 +6,7 @@ from rlbot.utils.game_state_util import GameState, BallState, CarState, Physics,
 from ..grading import GraderExercise, StrikerGrader, Grader
 
 
+# A shot where you have to hook it to score
 class HookShot(GraderExercise):
 
     def make_game_state(self, rng: random.Random) -> GameState:
