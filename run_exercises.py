@@ -2,6 +2,7 @@ from pathlib import Path
 
 from standard_training.exercise_runner import run_exercises
 from standard_training.exercises.bakkesmod_import.bakkesmod_importer import exercises_from_bakkesmod_playlist
+from standard_training.exercises.ball_prediction import make_ball_prediction_exercises
 from standard_training.exercises.easy_goalie import BallRollingToGoalie
 from standard_training.exercises.easy_striker import BallInFrontOfGoal, FacingAwayFromBallInFrontOfGoal
 from standard_training.exercises.versus_line_goalie import VersusLineGoalie
@@ -58,9 +59,14 @@ def run_with_bot_substitution():
             'Facing away x=1500 (simple_bot)': FacingAwayFromBallInFrontOfGoal(config_path, 1500.),
         }, infinite=True)
 
+def run_with_zero_bots():
+    config_path = config_dir / 'single_soccar_brick_bot.cfg'
+
+    run_exercises(make_ball_prediction_exercises(config_path), infinite=True)
 
 if __name__ == '__main__':
-    run_easy_exercises()
+    # run_easy_exercises()
     # run_some_bakkesmod_exercises()
     # run_versus_line_goalie()
     # run_with_bot_substitution()
+    run_with_zero_bots()
