@@ -17,7 +17,7 @@ class BallPredictionExercise(GraderExercise):
     def make_grader(self) -> Grader:
         return FailOnInconsistentBallPrediction()
 
-def get_exercises() -> Dict[str, GraderExercise]:
+def make_exercises() -> Dict[str, GraderExercise]:
     current_dir = Path(__file__).absolute().parent
     config_dir = current_dir.parent.parent / 'rlbot_configs'
     config_path = config_dir / 'single_soccar_brick_bot.cfg'

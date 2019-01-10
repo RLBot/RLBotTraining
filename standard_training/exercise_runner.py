@@ -41,21 +41,21 @@ def run_with_reloading(module):
     any new changes to the Exercise. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
     """
-    assert hasattr(module, 'get_exercises'), 'The exercise module must provide a get_exercises() function which returns a Dict[str, GraderExercise].'
+    assert hasattr(module, 'make_exercises'), 'The exercise module must provide a make_exercises() function which returns a Dict[str, GraderExercise].'
 
     while True:
-        exercises = module.get_exercises()
+        exercises = module.make_exercises()
         result_iter = run_all_exercises(exercises, seeds=infinite_seed_generator())
         for name, result in result_iter:
             on_result(name, result)
 
-            # reload
+            # Reload the module and apply the new exercises
             try:
                 importlib.reload(module)
             except Exception:
                 traceback.print_exc()
                 continue
-            new_exercises = module.get_exercises()
+            new_exercises = module.make_exercises()
             if new_exercises.keys() != exercises.keys():
                 get_logger(LOGGER_ID).warn(f'Need to restart to pick up new exercises.')
                 break  # different set of exercises. Can't monkeypatch.
@@ -74,4 +74,4 @@ def _monkeypatch_copy(source, destination):
         try:
             setattr(destination, attr_name, attr)
         except AttributeError:
-            continue  # ignore non-writable ones attributes like __weakref__.
+            continue  # ignore non-writable attributes like __weakref__.
