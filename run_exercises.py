@@ -76,8 +76,8 @@ def run_ball_prediction_exercises():
     run_with_reloading(standard_training.exercises.ball_prediction)
 
 if __name__ == '__main__':
-    run_easy_exercises()
+    # run_easy_exercises()
     # run_some_bakkesmod_exercises()
     # run_versus_line_goalie()
     # run_with_bot_substitution()
-    # run_ball_prediction_exercises()
+    run_ball_prediction_exercises()
