@@ -17,7 +17,10 @@ class BallPredictionExercise(GraderExercise):
     def make_grader(self) -> Grader:
         return FailOnInconsistentBallPrediction()
 
-def make_ball_prediction_exercises(config_path: Path) -> Dict[str, BallPredictionExercise]:
+def get_exercises() -> Dict[str, GraderExercise]:
+    current_dir = Path(__file__).absolute().parent
+    config_dir = current_dir.parent.parent / 'rlbot_configs'
+    config_path = config_dir / 'single_soccar_brick_bot.cfg'
     return {
         'PredictBallInAir': PredictBallInAir(config_path),
     }
@@ -31,8 +34,8 @@ class PredictBallInAir(BallPredictionExercise):
             return rng.uniform(-1, 1)
         return GameState(
             ball=BallState(physics=Physics(
-                location=Vector3(0, 0, 1000),
-                velocity=Vector3(0, 0, 0),
+                location=Vector3(0, 1000*n11(), 1000),
+                velocity=Vector3(0, 0, 700),
                 angular_velocity=Vector3(0, 0, 0))),
             cars={},
             boosts={i: BoostState(0) for i in range(34)},
@@ -45,4 +48,5 @@ class FailOnInconsistentBallPrediction(Grader):
         self.pass_on_timeout = PassOnTimeout(max_duration_seconds)
 
     def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
+        # TODO: Fail on inconsistency
         return self.pass_on_timeout.on_tick(tick)
