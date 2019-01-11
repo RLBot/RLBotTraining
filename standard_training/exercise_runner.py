@@ -54,10 +54,10 @@ def run_with_reloading(module):
             # Reload the module and apply the new exercises
             try:
                 importlib.reload(module)
+                new_exercises = module.make_exercises()
             except Exception:
                 traceback.print_exc()
-                continue
-            new_exercises = module.make_exercises()
+                continue  # eep running previous exercises until new ones are fixed.
             if new_exercises.keys() != exercises.keys():
                 get_logger(LOGGER_ID).warn(f'Need to restart to pick up new exercises.')
                 should_restart_training = True
