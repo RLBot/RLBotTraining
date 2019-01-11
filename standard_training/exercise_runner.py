@@ -43,7 +43,9 @@ def run_with_reloading(module):
     """
     assert hasattr(module, 'make_exercises'), 'The exercise module must provide a make_exercises() function which returns a Dict[str, GraderExercise].'
 
-    while True:
+    should_restart_training = True
+    while should_restart_training:
+        should_restart_training = False
         exercises = module.make_exercises()
         result_iter = run_all_exercises(exercises, seeds=infinite_seed_generator())
         for name, result in result_iter:
@@ -58,6 +60,7 @@ def run_with_reloading(module):
             new_exercises = module.make_exercises()
             if new_exercises.keys() != exercises.keys():
                 get_logger(LOGGER_ID).warn(f'Need to restart to pick up new exercises.')
+                should_restart_training = True
                 break  # different set of exercises. Can't monkeypatch.
             for ex_name, old_exercise in exercises.items():
                 _monkeypatch_copy(new_exercises[ex_name], old_exercise)
