@@ -4,6 +4,7 @@ from typing import Optional
 
 from rlbot.training.training import Exercise, Result
 from rlbot.utils.game_state_util import GameState
+from rlbot.utils.rendering.rendering_manager import RenderingManager
 from rlbot.utils.structures.game_data_struct import GameTickPacket
 
 from . import TrainingTickPacket, Grader
@@ -38,6 +39,9 @@ class GraderExercise(Exercise):
         assert self.grader, "setup() must be called before on_tick such that self.grader is set."
         self.training_tick_packet.update(game_tick_packet)
         return self.grader.on_tick(self.training_tick_packet)
+
+    def render(self, renderer: RenderingManager):
+        self.grader.render(renderer)
 
     def make_game_state(self, rng: random.Random) -> GameState:
         raise NotImplementedError()

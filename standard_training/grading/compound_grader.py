@@ -25,6 +25,9 @@ class CompoundGrader(Grader):
             for grader_name, grader in self.graders.items()
         }
 
+    def render(self):
+        for grader in self.graders:
+            grader.render()
 
 def pick_more_significant_grade(a: Optional[Grade], b: Optional[Grade]) -> Optional[Grade]:
     """
