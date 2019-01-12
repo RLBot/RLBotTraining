@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from standard_training.alter_config import alter_config, use_bot
-from standard_training.exercise_runner import run_exercises, run_with_reloading
+from standard_training.exercise_runner import run_exercises, run_module
 from standard_training.exercises.bakkesmod_import.bakkesmod_importer import exercises_from_bakkesmod_playlist
 from standard_training.exercises.ball_prediction import make_ball_prediction_exercises
 from standard_training.exercises.dribbling import Dribbling
@@ -73,7 +73,7 @@ def run_with_bot_substitution():
         }, infinite=True)
 
 def run_ball_prediction_exercises():
-    run_with_reloading(standard_training.exercises.ball_prediction)
+    run_module(standard_training.exercises.ball_prediction)
 
 if __name__ == '__main__':
     # run_easy_exercises()
