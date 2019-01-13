@@ -1,11 +1,13 @@
 import random
+from pathlib import Path
 from typing import Optional
-from rlbot.training.training import Grade, Exercise, Result
+
+from rlbot.training.training import Exercise, Result
 from rlbot.utils.game_state_util import GameState
 from rlbot.utils.structures.game_data_struct import GameTickPacket
-from pathlib import Path
 
 from . import TrainingTickPacket, Grader
+
 
 class GraderExercise(Exercise):
     """
@@ -42,4 +44,3 @@ class GraderExercise(Exercise):
 
     def make_grader(self) -> Grader:
         raise NotImplementedError()
-

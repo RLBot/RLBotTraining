@@ -1,8 +1,9 @@
-from typing import Optional, List
+from typing import List
 
 from rlbot.utils.structures.game_data_struct import GameTickPacket
 
 from . import PlayerEventDetector, PlayerEvent
+
 
 class TrainingTickPacket:
     """A GameTickPacket but with extra preprocessed information."""

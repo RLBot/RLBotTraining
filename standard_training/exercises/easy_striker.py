@@ -1,6 +1,6 @@
-from pathlib import Path
 import random
 from math import pi
+from pathlib import Path
 
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
@@ -34,7 +34,7 @@ class BallInFrontOfGoal(GraderExercise):
 
 
 class FacingAwayFromBallInFrontOfGoal(GraderExercise):
-    def __init__(self, config_path: Path, car_start_x: float, car_start_y: float=3000):
+    def __init__(self, config_path: Path, car_start_x: float, car_start_y: float = 3000):
         super().__init__(config_path)
         self.car_start_x = car_start_x
         self.car_start_y = car_start_y
@@ -52,12 +52,29 @@ class FacingAwayFromBallInFrontOfGoal(GraderExercise):
                         rotation=Rotator(0, -pi / 2, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
-                    jumped=False,
-                    double_jumped=False,
+                    jumped=True,
+                    double_jumped=True,
                     boost_amount=0)
             },
             boosts={i: BoostState(0) for i in range(34)},
         )
+
+    def make_grader(self) -> Grader:
+        return StrikerGrader()
+
+
+# The ball is rolling towards goal but you still need to put it in
+class RollingTowardsGoalShot(GraderExercise):
+
+    def make_game_state(self, rng: random.Random) -> GameState:
+        car_pos = Vector3(0, -2500, 25)
+        ball_pos = Vector3(random.uniform(-1000, 1000), random.uniform(0, 1500), 100)
+        ball_state = BallState(Physics(location=ball_pos, velocity=Vector3(0, 550, 0)))
+        car_state = CarState(boost_amount=87, jumped=True, double_jumped=True,
+                             physics=Physics(location=car_pos, rotation=Rotator(0, pi / 2, 0)))
+        enemy_car = CarState(physics=Physics(location=Vector3(0, 5120, 25)))
+        game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
+        return game_state
 
     def make_grader(self) -> Grader:
         return StrikerGrader()

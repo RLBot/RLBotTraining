@@ -1,8 +1,10 @@
 import random
 from math import pi
+
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
 from ..grading import GraderExercise, GoalieGrader, Grader
+
 
 class VersusLineGoalie(GraderExercise):
 
@@ -11,8 +13,8 @@ class VersusLineGoalie(GraderExercise):
         return GameState(
             ball=BallState(physics=Physics(
                 location=Vector3(0, -1500, 100),
-                velocity=Vector3(vel_mul * 480 * rng.uniform(-1, 1), vel_mul* -2000, 0),
-                angular_velocity=Vector3(0,0,0))),
+                velocity=Vector3(vel_mul * 480 * rng.uniform(-1, 1), vel_mul * -2000, 0),
+                angular_velocity=Vector3(0, 0, 0))),
             cars={
                 # Goalie
                 0: CarState(
@@ -28,7 +30,7 @@ class VersusLineGoalie(GraderExercise):
                 1: CarState(
                     physics=Physics(
                         location=Vector3(0, 0, 15),
-                        rotation=Rotator(0, pi/2, 0),
+                        rotation=Rotator(0, pi / 2, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
                     jumped=False,

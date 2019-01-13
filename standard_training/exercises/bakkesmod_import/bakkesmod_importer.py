@@ -1,13 +1,13 @@
-from typing import Optional, Mapping, Any
-import urllib.request
-from pathlib import Path
 import json
 import random
+import urllib.request
+from pathlib import Path
+from typing import Mapping, Any
 
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 from rlbot.utils.logging_utils import get_logger
 
-from ...grading import GraderExercise, StrikerGrader, Grader
+from ...grading import GraderExercise, StrikerGrader
 
 cache_dir = Path(__file__).absolute().parent / 'download_cache'
 logger_id = 'bakkesmod_importer'

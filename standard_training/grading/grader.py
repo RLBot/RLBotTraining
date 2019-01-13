@@ -1,4 +1,4 @@
-from typing import Any, Mapping, Optional, List
+from typing import Any, Mapping, Optional
 
 from rlbot.training.training import Grade
 
