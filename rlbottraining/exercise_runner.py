@@ -1,14 +1,16 @@
 from types import ModuleType
-from typing import Dict
+from typing import Dict, Tuple
 import time
 import traceback
-
+from pathlib import Path
 import importlib
 
 from rlbot.training.training import Pass, run_all_exercises, Result
 from rlbot.utils.logging_utils import get_logger
+from rlbot.utils.class_importer import load_external_class
 
 from .grading import GraderExercise
+from .playlist import Playlist
 
 LOGGER_ID = 'training'
 
@@ -40,41 +42,19 @@ def run_exercises(exercises: Dict[str, GraderExercise], infinite=False):
 class ReloadPolicy:
     NEVER = 1
     EACH_EXERCISE = 2
+    # TODO: on .py file change in (sub-) directory
 
-def reload_package(root_module):
-    package_name = root_module.__name__
-
-    # get a reference to each loaded module
-    loaded_package_modules = dict([
-        (key, value) for key, value in sys.modules.items()
-        if key.startswith(package_name) and isinstance(value, ModuleType)])
-
-    # delete references to these loaded modules from sys.modules
-    for key in loaded_package_modules:
-        del sys.modules[key]
-
-    # load each of the modules again;
-    # make old modules share state with new modules
-    for key in loaded_package_modules:
-        print ('loading %s' % key)
-        newmodule = __import__(key)
-        oldmodule = loaded_package_modules[key]
-        oldmodule.__dict__.clear()
-        oldmodule.__dict__.update(newmodule.__dict__)
-
-
-def run_module(module, reload_policy=ReloadPolicy.EACH_EXERCISE):
+def run_module(python_file_with_playlist: Path, reload_policy=ReloadPolicy.EACH_EXERCISE):
     """
     This method runs exercises in the module and reloads the module to pick up
     any new changes to the Exercise. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
     """
-    assert hasattr(module, 'make_exercises'), 'The exercise module must provide a make_exercises() function which returns a Dict[str, GraderExercise].'
-
+    exercises = make_exercises(python_file_with_playlist)
     should_restart_training = True
     while should_restart_training:
         should_restart_training = False
-        exercises = module.make_exercises()
+
         result_iter = run_all_exercises(exercises, seeds=infinite_seed_generator())
         for name, result in result_iter:
             on_result(name, result)
@@ -82,17 +62,22 @@ def run_module(module, reload_policy=ReloadPolicy.EACH_EXERCISE):
             # Reload the module and apply the new exercises
             if reload_policy == ReloadPolicy.EACH_EXERCISE:
                 try:
-                    importlib.reload(module)
-                    new_exercises = module.make_exercises()
+                    new_exercises = make_exercises(python_file_with_playlist)
                 except Exception:
                     traceback.print_exc()
                     continue  # keep running previous exercises until new ones are fixed.
                 if new_exercises.keys() != exercises.keys():
                     get_logger(LOGGER_ID).warn(f'Need to restart to pick up new exercises.')
                     should_restart_training = True
+                    exercises = new_exercises
                     break  # different set of exercises. Can't monkeypatch.
                 for ex_name, old_exercise in exercises.items():
                     _monkeypatch_copy(new_exercises[ex_name], old_exercise)
+
+def make_exercises(python_file_with_playlist: Path) -> Dict[str, GraderExercise]:
+    cls_module = load_external_class(python_file_with_playlist, Playlist)
+    playlist: Playlist = cls_module[0]()
+    return playlist.make_exercises()
 
 def _monkeypatch_copy(source, destination):
     """

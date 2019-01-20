@@ -11,8 +11,9 @@ from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarSta
 from rlbot.utils.structures.game_interface import GameInterface
 from rlbot.utils.rendering.rendering_manager import RenderingManager
 
-from ..grading import GraderExercise, Grader, TrainingTickPacket, Grader, PassOnTimeout
-
+from rlbottraining.grading import GraderExercise, Grader, TrainingTickPacket, Grader, PassOnTimeout
+from rlbottraining.playlist import Playlist
+from rlbottraining.paths import MatchConfigs
 
 """
 This module contains exercises which does not test any bots at all!
@@ -23,14 +24,14 @@ But it does test ball prediction.
 PredictionFunc = Callable[[GameInterface], BallPrediction]
 PredictionFunc_ = Callable[[], BallPrediction]
 
-def make_exercises() -> Dict[str, GraderExercise]:
-    prediction_func = make_prediction_func()
-    return make_ball_prediction_exercises(prediction_func)
+class MyPlaylist(Playlist):
+    def make_exercises(self) -> Dict[str, GraderExercise]:
+        prediction_func = make_prediction_func()
+        return make_ball_prediction_exercises(prediction_func)
 
 def make_ball_prediction_exercises(prediction_func: PredictionFunc):
     current_dir = Path(__file__).absolute().parent
-    config_dir = current_dir.parent.parent / 'rlbot_configs'
-    config_path = config_dir / 'single_soccar_brick_bot.cfg'
+    config_path = MatchConfigs.single_soccar_brick_bot
 
     # Initialize game_interface in a thread as it needs a whiel to get ready.
     game_interface: Optional[GameInterface] = None
@@ -179,5 +180,3 @@ class SlidingIntoRolling(BallPredictionExercise):
                 angular_velocity=Vector3(0,0,0))),
             cars=cars_in_goal
         )
-
-
