@@ -22,7 +22,7 @@ But it does test ball prediction.
 
 # A function which gets data from the GameInterface to predict the the ball.
 PredictionFunc = Callable[[GameInterface], BallPrediction]
-PredictionFunc_ = Callable[[], BallPrediction]
+PredictionFunc_ = Callable[[], BallPrediction]  # This version is a closure over its data source (GameInterface).
 
 class MyPlaylist(Playlist):
     def make_exercises(self) -> Dict[str, GraderExercise]:
