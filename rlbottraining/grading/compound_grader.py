@@ -2,6 +2,7 @@ from functools import reduce
 from typing import Any, Mapping, Optional
 
 from rlbot.training.training import Pass, Fail, Grade
+from rlbot.utils.rendering.rendering_manager import RenderingManager
 
 from . import Grader, TrainingTickPacket
 
@@ -25,6 +26,9 @@ class CompoundGrader(Grader):
             for grader_name, grader in self.graders.items()
         }
 
+    def render(self, renderer: RenderingManager):
+        for grader in self.graders.values():
+            grader.render(renderer)
 
 def pick_more_significant_grade(a: Optional[Grade], b: Optional[Grade]) -> Optional[Grade]:
     """

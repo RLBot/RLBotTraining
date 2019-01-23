@@ -1,6 +1,7 @@
 from typing import Any, Mapping, Optional
 
 from rlbot.training.training import Grade
+from rlbot.utils.rendering.rendering_manager import RenderingManager
 
 from . import TrainingTickPacket
 
@@ -19,3 +20,10 @@ class Grader:
     def get_metrics(self) -> Mapping[str, Any]:
         return {}  # No metrics by default
 
+    def render(self, renderer: RenderingManager):
+        """
+        This method is called each tick to render exercise debug information.
+        This method is called after on_tick() / grading.
+        It is optional to override this method.
+        """
+        pass
