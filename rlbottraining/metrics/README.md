@@ -1,17 +1,17 @@
 # Usual use of the RLBotTraining metrics architecture.
 ## Written as a story about a fictional bot-maker "Taylor".
 
-Taylor creates a bot in a programming language of their choosing.
-Taylor makes RLBotTraining GraderExercise's for the bot and also runs some of the Exercises contained in RLBotTraining as well.
-These Exercises use include a grader which could be from the framework or Taylor could write a Grader which is only applicable to their bot to train some special task.
-When an exercise finishes, grader.get_metrics() is called.
-These metrics are wrapped with information to reproduce the exercise and written to disk in JSON format within a metrics_dir of Taylors choosing.
-The rlbottraining.metrics.viewer submodule helps us make sense of the metrics in the metrics_dir.
-Its purpose is to create views on the metrics_dir which manifests itself as generating a website hosting a static view of the data.
-Having a static website makes hosting/sharing/viewing the results easy:
-For instance, Taylor can push this static website to https://pages.github.com/ or host it locally using the built-in `python -m http.server`.
-The website generation automatically generates a bunch of useful "View-Data" JSON files to support aggregations of the metrics, such as "Winrate of TaylorBot vs NomBot".
-The generated website includes JS to to allow visualizations of the View Data.
-Both generating the View-Data and JS visualization thereof may be customized by Taylor by providing WebsiteExtension's when generating the website.
-Taylor can add their own visualizations of the View-Data by providing JS code at website-generation time.
-Taylor now can view nicely visualizied, aggregated results generated for their bot training and share this with others.
+- Taylor creates a bot in a programming language of their choosing.
+- Taylor makes RLBotTraining GraderExercise's for the bot and also runs some of the Exercises contained in RLBotTraining as well.
+- These Exercises use include a Grader which could be from the framework or Taylor could write a Grader which is only applicable to their bot to train some special task.
+- When an exercise finishes, grader.get_metrics() is called.
+- These metrics are wrapped with information to reproduce the exercise and written to disk in JSON format within a metrics_dir of Taylors choosing.
+- The rlbottraining.metrics.viewer submodule helps us make sense of the metrics in the metrics_dir.
+- Its purpose is to create views on the metrics_dir which manifests itself as generating a website hosting a static view of the data.
+- Having a static website makes hosting/sharing/viewing the results easy:
+- For instance, Taylor can push this static website to https://pages.github.com/ or host it locally using the built-in `python -m http.server`.
+- The website generation automatically generates a bunch of useful "View-Data" JSON files to support aggregations of the metrics, such as "Winrate of TaylorBot vs NomBot".
+- The generated website includes JS to to allow visualizations of the View Data.
+- Both generating the View-Data and JS visualization thereof may be customized by Taylor by providing WebsiteExtension's when generating the website.
+- Taylor can add their own visualizations of the View-Data by providing JS code at website-generation time.
+- Taylor now can view nicely visualizied, aggregated results generated for their bot training and share this with others.
