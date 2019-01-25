@@ -1,10 +1,12 @@
+from dataclasses import dataclass
 from functools import reduce
-from typing import Any, Mapping, Optional
+from typing import Mapping, Optional, List
 
 from rlbot.training.training import Pass, Fail, Grade
 from rlbot.utils.rendering.rendering_manager import RenderingManager
 
-from . import Grader, TrainingTickPacket
+from rlbottraining.grading.grader import Grader, TrainingTickPacket
+from rlbottraining.metrics.metric import Metric
 
 
 class CompoundGrader(Grader):
@@ -20,11 +22,14 @@ class CompoundGrader(Grader):
         grades = [grader.on_tick(tick) for grader in self.graders.values()]
         return reduce(pick_more_significant_grade, grades, None)
 
-    def get_metrics(self) -> Mapping[str, Any]:
-        return {
-            grader_name: grader.get_metrics()
+    @dataclass(frozen=True)
+    class CompoundMetric(Metric):
+        metrics: Mapping[str, Metric]
+    def get_metric(self) -> Optional[Metric]:
+        return CompoundGrader.CompoundMetric({
+            grader_name: grader.get_metric()
             for grader_name, grader in self.graders.items()
-        }
+        })
 
     def render(self, renderer: RenderingManager):
         for grader in self.graders.values():

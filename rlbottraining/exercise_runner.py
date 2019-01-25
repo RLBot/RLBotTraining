@@ -37,7 +37,7 @@ def run_exercises(exercises: Dict[str, GraderExercise], infinite=False):
     result_iter = run_all_exercises(exercises, seeds=seeds)
     for name, result in result_iter:
         on_result(name, result)
-        # TODO: put result.exercise.get_metrics() into a database
+        # TODO: put Metric into a database
 
 class ReloadPolicy:
     NEVER = 1

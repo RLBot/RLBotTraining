@@ -4,6 +4,7 @@ from rlbot.training.training import Grade
 from rlbot.utils.rendering.rendering_manager import RenderingManager
 
 from . import TrainingTickPacket
+from ..metrics.metric import Metric
 
 
 class Grader:
@@ -17,8 +18,8 @@ class Grader:
         """ Similar to Exercise.on_tick() but takes a preprocessed data structure. """
         pass  # Continue by default
 
-    def get_metrics(self) -> Mapping[str, Any]:
-        return {}  # No metrics by default
+    def get_metric(self) -> Optional[Metric]:
+        return None  # No metrics by default
 
     def render(self, renderer: RenderingManager):
         """

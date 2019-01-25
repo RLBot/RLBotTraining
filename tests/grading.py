@@ -1,10 +1,11 @@
 import random
 import unittest
 
-from grading import Grader, GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, \
-    PlayerEventType
 from rlbot.utils.game_state_util import GameState
 from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
+
+from rlbottraining.grading import Grader, GraderExercise, CompoundGrader, FailOnTimeout, PlayerEventDetector, PlayerEvent, \
+    PlayerEventType
 
 """
 This file is a unit test for the grading module which does not require RocketLeague to run.
@@ -30,13 +31,16 @@ class GradingTest(unittest.TestCase):
         self.assertIsNotNone(fail_timeout)
         self.assertIsInstance(fail_timeout, FailOnTimeout.FailDueToTimeout)
 
-        self.assertDictEqual(ex.grader.get_metrics(), {
-            'timeout': {
-                'max_duration_seconds': 3.5,
-                'initial_seconds_elapsed': 20.0,
-                'measured_duration_seconds': 3.75,
-            }
-        })
+        self.assertEqual(
+            ex.grader.get_metric(),
+            CompoundGrader.CompoundMetric({
+                'my_test_timeout': FailOnTimeout.TimeoutMetric(
+                    max_duration_seconds = 3.5,
+                    initial_seconds_elapsed = 20.0,
+                    measured_duration_seconds = 3.75,
+                )
+            })
+        )
 
     def test_player_events(self):
         detector = PlayerEventDetector()
@@ -64,7 +68,7 @@ class TimeoutExercise(GraderExercise):
 
     def make_grader(self) -> Grader:
         return CompoundGrader({
-            'timeout': FailOnTimeout(3.5)
+            'my_test_timeout': FailOnTimeout(3.5)
         })
 
 

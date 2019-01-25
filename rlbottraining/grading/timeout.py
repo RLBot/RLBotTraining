@@ -1,8 +1,10 @@
 from typing import Any, Mapping, Optional
+from dataclasses import dataclass
 
 from rlbot.training.training import Pass, Fail, Grade
 
-from . import Grader, TrainingTickPacket
+from rlbottraining.grading.grader import Grader, TrainingTickPacket
+from rlbottraining.metrics.metric import Metric
 
 
 class FailOnTimeout(Grader):
@@ -28,12 +30,17 @@ class FailOnTimeout(Grader):
         if self.measured_duration_seconds > self.max_duration_seconds:
             return self.FailDueToTimeout(self.max_duration_seconds)
 
-    def get_metrics(self) -> Mapping[str, Any]:
-        return {
-            'max_duration_seconds': self.max_duration_seconds,
-            'initial_seconds_elapsed': self.initial_seconds_elapsed,
-            'measured_duration_seconds': self.measured_duration_seconds,
-        }
+    @dataclass(frozen=True)
+    class TimeoutMetric(Metric):
+        max_duration_seconds: float
+        initial_seconds_elapsed: float
+        measured_duration_seconds: float
+    def get_metric(self) -> Optional[Metric]:
+        return FailOnTimeout.TimeoutMetric(
+            self.max_duration_seconds,
+            self.initial_seconds_elapsed,
+            self.measured_duration_seconds,
+        )
 
 
 class PassOnTimeout(FailOnTimeout):

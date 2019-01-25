@@ -1,10 +1,11 @@
 import unittest
 import json
 
+from rlbottraining.grading.grader import Grader
 from rlbottraining.metrics.metric import Metric
 from rlbottraining.metrics.metric_json_encoder import MetricJsonEncoder
 
-from example_metrics import ExampleMetric, ExampleMetric2
+from .utils.example_metrics import ExampleMetric, ExampleMetric2
 
 class MetricsTest(unittest.TestCase):
 
@@ -26,7 +27,7 @@ class MetricsTest(unittest.TestCase):
                 cls=MetricJsonEncoder,
                 sort_keys=True,
             ),
-            '{"__class__": "example_metrics.ExampleMetric", "momentum": [1.5, 2, 0], "speed": 2.5}'
+            '{"__class__": "tests.utils.example_metrics.ExampleMetric", "momentum": [1.5, 2, 0], "speed": 2.5}'
         )
 
         self.assertEqual(
@@ -35,7 +36,16 @@ class MetricsTest(unittest.TestCase):
                 cls=MetricJsonEncoder,
                 sort_keys=True,
             ),
-            '{"__class__": "example_metrics.ExampleMetric2", "momentum": [1.5, 2, 0], "speed": 2.5, "violence": true}'
+            '{"__class__": "tests.utils.example_metrics.ExampleMetric2", "momentum": [1.5, 2, 0], "speed": 2.5, "violence": true}'
+        )
+
+        self.assertEqual(
+            json.dumps(
+                {'hello there': Grader().get_metric()},
+                cls=MetricJsonEncoder,
+                sort_keys=True,
+            ),
+            '{"hello there": null}'
         )
 
 if __name__ == '__main__':

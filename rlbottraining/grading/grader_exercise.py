@@ -9,7 +9,6 @@ from rlbot.utils.structures.game_data_struct import GameTickPacket
 
 from . import TrainingTickPacket, Grader
 
-
 class GraderExercise(Exercise):
     """
     The usual base-class for Exercises in this repo.
