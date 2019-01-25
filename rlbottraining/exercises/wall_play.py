@@ -6,7 +6,7 @@ from ..grading import GraderExercise, StrikerGrader, Grader
 
 
 # A test where the ball is rolling towards the walls
-class SetupWallPlay(GraderExercise):
+class BallRollingTowardsWall(GraderExercise):
 
     def make_game_state(self, rng: random.Random) -> GameState:
         car_pos = Vector3(0, 250, 25)
