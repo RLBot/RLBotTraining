@@ -44,6 +44,15 @@ class MetricsTest(unittest.TestCase):
         self.assertEqual(repr(rect), 'MetricsTest.test_dataclass_2.<locals>.Rectangle(width=3, height=4)')
         self.assertTrue(hasattr(rect, 'foo'))
         self.assertFalse(hasattr(rect, 'bar'))
+        class Cuboid(Rectangle):
+            def __init__(self, width, height, depth):
+                super().__init__(width, height)
+                self.depth = depth
+        cube = Cuboid(1,2,3)
+        self.assertEqual(cube.width, 1)
+        self.assertEqual(cube.height, 2)
+        self.assertEqual(cube.depth, 3)
+
 
     def test_encode_metric(self):
         self.assertEqual(
