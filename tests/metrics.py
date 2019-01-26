@@ -53,6 +53,50 @@ class MetricsTest(unittest.TestCase):
         self.assertEqual(cube.height, 2)
         self.assertEqual(cube.depth, 3)
 
+    def test_dataclass_3(self):
+        '''
+        Check how overriding default values works.
+        '''
+        @dataclass
+        class Rectangle:
+            width: float = 0
+            height: float = 0
+        @dataclass
+        class SpecificWidthRectangle(Rectangle):
+            width: float = 5
+            specificWidth: bool = True
+
+        self.assertEqual(
+            # Same argument-order as Rectangle
+            repr(SpecificWidthRectangle(3)),
+            'MetricsTest.test_dataclass_3.<locals>.SpecificWidthRectangle(width=3, height=0, specificWidth=True)'
+        )
+        self.assertEqual(
+            repr(SpecificWidthRectangle(height=3)),
+            'MetricsTest.test_dataclass_3.<locals>.SpecificWidthRectangle(width=5, height=3, specificWidth=True)'
+        )
+        self.assertEqual(
+            SpecificWidthRectangle(3).__dict__,
+            {'width': 3, 'height': 0, 'specificWidth': True}
+        )
+
+        @dataclass
+        class SpecificHeightRectangle(Rectangle):
+            height: float = 4
+            specificHeight: bool = True
+
+        '''
+        How does diamond-shaped multiple-inheritance work?
+        It grabs the overriding defauls of one, including its base class.
+        '''
+        @dataclass
+        class SpecificWidthHeightRectangle(SpecificWidthRectangle, SpecificHeightRectangle):
+            pass
+        self.assertEqual(
+            repr(SpecificWidthHeightRectangle()),
+            'MetricsTest.test_dataclass_3.<locals>.SpecificWidthHeightRectangle(width=5, height=0, specificHeight=True, specificWidth=True)'
+        )
+
 
     def test_encode_metric(self):
         self.assertEqual(
