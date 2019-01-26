@@ -4,7 +4,7 @@
 - Taylor creates a bot in a programming language of their choosing.
 - Taylor makes RLBotTraining GraderExercise's for the bot and also runs some of the Exercises contained in RLBotTraining as well.
 - These Exercises use include a Grader which could be from the framework or Taylor could write a Grader which is only applicable to their bot to train some special task.
-- TODO: When an exercise finishes, grader.get_metrics() is called.
+- TODO: When an exercise finishes, grader.get_metric() is called.
 - TODO: These metrics are wrapped with information to reproduce the exercise and written to disk in JSON format within a `metrics_dir` of Taylors choosing.
 - TODO: The rlbottraining.metrics.viewer submodule helps us make sense of the metrics in the `metrics_dir`.
 - TODO: Its purpose is to create views on the metrics_dir which manifests itself as generating a website hosting a static view of the data.
