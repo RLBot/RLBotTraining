@@ -106,6 +106,17 @@ class MetricsTest(unittest.TestCase):
             'MetricsTest.test_dataclass_3.<locals>.CompositeRectangle(width=5, height=4)'
         )
 
+        # A class with a nondefault may not override a dataclass with a default.
+        try:
+            @dataclass
+            class Cuboid(Rectangle):
+                depth: float
+        except TypeError:
+            pass
+        else:
+            self.fail()
+
+
     def test_encode_metric(self):
         self.assertEqual(
             encode(ExampleMetric(2.5, (1.5, 2, 0))),
