@@ -97,6 +97,14 @@ class MetricsTest(unittest.TestCase):
             'MetricsTest.test_dataclass_3.<locals>.SpecificWidthHeightRectangle(width=5, height=0, specificHeight=True, specificWidth=True)'
         )
 
+        @dataclass
+        class CompositeRectangle(Rectangle):
+            width: float = SpecificWidthRectangle.width
+            height: float = SpecificHeightRectangle.height
+        self.assertEqual(
+            repr(CompositeRectangle()),
+            'MetricsTest.test_dataclass_3.<locals>.CompositeRectangle(width=5, height=4)'
+        )
 
     def test_encode_metric(self):
         self.assertEqual(
