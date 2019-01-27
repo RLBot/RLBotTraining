@@ -35,6 +35,16 @@ class GradingTest(unittest.TestCase):
             self.assertIsNotNone(fail_timeout)
             self.assertIsInstance(fail_timeout, FailOnTimeout.FailDueToTimeout)
 
+            # Check that the config path and its contents look sane
+            self.assertTrue(ex.get_config_path().startswith(tmp_history_dir))
+            # note: The repeated call to get_config_path() is intentional.
+            #       as it checks the hash_named_file.exists() branch in ensure_match_config_on_disk()
+            with open(ex.get_config_path()) as f:
+                json_str = f.read()
+            self.assertIn('simple_bot.cfg', json_str)
+            self.assertIn('"gravity": "Default"', json_str)
+            self.assertIn('"match_length": "Unlimited"', json_str)
+
     # def test_timeout_twenty_with_metrics(self):
     #     ex = TimeoutExercise('')
     #     ex.setup(random.Random(7))
