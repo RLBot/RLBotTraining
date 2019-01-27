@@ -7,6 +7,7 @@ release_notes = {
     '0.1.0': '''
         - Start doing release notes - DomNomNom
         - Add Metrics - DomNomNom
+        - Big refactor including how MatchConfigs are handled - DomNomNom
     ''',
 }
 

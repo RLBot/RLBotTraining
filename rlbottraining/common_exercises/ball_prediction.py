@@ -1,7 +1,5 @@
+from dataclasses import dataclass
 from typing import Dict, Optional, Callable, List
-import random
-from pathlib import Path
-from math import tau
 from threading import Thread
 
 from rlbot.utils.structures.ball_prediction_struct import BallPrediction, Slice as BallAtTime
@@ -11,60 +9,22 @@ from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarSta
 from rlbot.utils.structures.game_interface import GameInterface
 from rlbot.utils.rendering.rendering_manager import RenderingManager
 
-from rlbottraining.grading import GraderExercise, Grader, TrainingTickPacket, Grader, PassOnTimeout
-from rlbottraining.playlist import Playlist
-from rlbottraining.paths import MatchConfigs
+from rlbottraining.exercises.training_exercise import TrainingExercise, Playlist
+from rlbottraining.grading import Grader, TrainingTickPacket, Grader, PassOnTimeout
+from rlbottraining.match_configs import make_empty_match_config
+from rlbottraining.paths import BotConfigs
+from rlbottraining.rng import SeededRandomNumberGenerator
 
 """
 This module contains exercises which does not test any bots at all!
 But it does test ball prediction.
 """
 
+################### Type Defenitions ###################
+
 # A function which gets data from the GameInterface to predict the the ball.
 PredictionFunc = Callable[[GameInterface], BallPrediction]
 PredictionFunc_ = Callable[[], BallPrediction]  # This version is a closure over its data source (GameInterface).
-
-class MyPlaylist(Playlist):
-    def make_exercises(self) -> Dict[str, GraderExercise]:
-        prediction_func = make_prediction_func()
-        return make_ball_prediction_exercises(prediction_func)
-
-def make_ball_prediction_exercises(prediction_func: PredictionFunc):
-    current_dir = Path(__file__).absolute().parent
-    config_path = MatchConfigs.single_soccar_brick_bot
-
-    # Initialize game_interface in a thread as it needs a whiel to get ready.
-    game_interface: Optional[GameInterface] = None
-    def init_interface():
-        nonlocal game_interface
-        interface = GameInterface(get_logger(f'FailOnInconsistentBallPrediction'))
-        interface.load_interface()
-        game_interface = interface
-    Thread(target=init_interface, daemon=True).start()
-
-    def wrapped_prediction_func():
-        nonlocal game_interface
-        nonlocal prediction_func
-        if game_interface is None:
-            return BallPrediction()
-        return prediction_func(game_interface)
-
-    ball_prediction_exercise_classes = [
-        PredictBallInAir,
-        SlidingIntoRolling,
-    ]
-    return {
-        cls.__name__ : cls(wrapped_prediction_func, config_path)
-        for cls in ball_prediction_exercise_classes
-    }
-
-def make_prediction_func() -> PredictionFunc:
-    prediction_struct = BallPrediction()
-    def prediction_func(game_interface: GameInterface) -> BallPrediction:
-        nonlocal prediction_struct
-        game_interface.update_ball_prediction(prediction_struct)
-        return prediction_struct
-    return prediction_func
 
 ################### Grader ###################
 
@@ -136,13 +96,13 @@ class FailOnInconsistentBallPrediction(Grader):
 
 ################### Exercise definitions ###################
 
-class BallPredictionExercise(GraderExercise):
-    def __init__(self, prediction_func: PredictionFunc_, config_path):
-        super().__init__(config_path)
-        self.prediction_func = prediction_func
-
-    def make_grader(self) -> Grader:
-        return FailOnInconsistentBallPrediction(self.prediction_func)
+def make_ball_prediction_match_config() -> MatchConfig:
+    match_config = get_empty_training_config()
+    match_config.player_configs = [
+        # RocketLeague doesn't like being started without any players.
+        PlayerConfig.bot_config(BotConfigs.brick_bot, Team.BLUE),
+    ]
+    return match_config
 
 cars_in_goal = {
     0: CarState(
@@ -156,8 +116,13 @@ cars_in_goal = {
         boost_amount=100),
 }
 
+@dataclass
+BallPredictionExercise(TrainingExercise):
+    match_config = field(default_factory=make_ball_prediction_match_config)
+
+@dataclass
 class PredictBallInAir(BallPredictionExercise):
-    def make_game_state(self, rng: random.Random) -> GameState:
+    def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
         def n11():
             """A Shorthand to get a random value between negative 1 and 1. """
             nonlocal rng
@@ -170,8 +135,9 @@ class PredictBallInAir(BallPredictionExercise):
             cars=cars_in_goal,
         )
 
+@dataclass
 class SlidingIntoRolling(BallPredictionExercise):
-    def make_game_state(self, rng: random.Random) -> GameState:
+    def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
         speed = rng.uniform(10, 1800)
         return GameState(
             ball=BallState(physics=Physics(
@@ -180,3 +146,46 @@ class SlidingIntoRolling(BallPredictionExercise):
                 angular_velocity=Vector3(0,0,0))),
             cars=cars_in_goal
         )
+
+
+################### Playlist ###################
+
+def make_ball_prediction_exercises(prediction_func: PredictionFunc) -> Playlist:
+    # Initialize game_interface in a thread as it needs a whiel to get ready.
+    game_interface: Optional[GameInterface] = None
+    def init_interface():
+        nonlocal game_interface
+        interface = GameInterface(get_logger(f'FailOnInconsistentBallPrediction'))
+        interface.load_interface()
+        game_interface = interface
+    Thread(target=init_interface, daemon=True).start()
+
+    def wrapped_prediction_func():
+        nonlocal game_interface
+        nonlocal prediction_func
+        if game_interface is None:
+            return BallPrediction()
+        return prediction_func(game_interface)
+    ball_prediction_grader = FailOnInconsistentBallPrediction(wrapped_prediction_func)
+
+    ball_prediction_exercise_classes = [
+        PredictBallInAir,
+        SlidingIntoRolling,
+    ]
+    return [
+        cls(name=cls.__name__, grader=ball_prediction_grader)
+        for cls in ball_prediction_exercise_classes
+    ]
+
+def default_prediction_func() -> PredictionFunc:
+    prediction_struct = BallPrediction()
+    def prediction_func(game_interface: GameInterface) -> BallPrediction:
+        nonlocal prediction_struct
+        game_interface.update_ball_prediction(prediction_struct)
+        return prediction_struct
+    return prediction_func
+
+
+default_ball_prediction_playlist: Playlist = make_ball_prediction_exercises(
+    default_prediction_func()
+)

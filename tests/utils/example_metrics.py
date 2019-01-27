@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple
 
-from rlbottraining.metrics.metric import Metric
+from rlbottraining.history.metric import Metric
 
 @dataclass(frozen=True)
 class ExampleMetric(Metric):

@@ -1,12 +1,12 @@
 import unittest
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from rlbot.training.training import Pass, Fail, FailDueToExerciseException, Result
 
 from rlbottraining.grading.grader import Grader
-from rlbottraining.metrics.metric import Metric
-from rlbottraining.metrics.metric_json_encoder import MetricJsonEncoder
+from rlbottraining.history.metric import Metric
+from rlbottraining.history.metric_json_encoder import MetricJsonEncoder
 
 from .utils.example_metrics import ExampleMetric, ExampleMetric2
 
@@ -131,8 +131,8 @@ class MetricsTest(unittest.TestCase):
 
     def test_encode_from_base_grader(self):
         self.assertEqual(
-            encode({'hello there': Grader().get_metric()}),
-            '{"hello there": null}'
+            encode({'hello there': Grader()}),
+            '{"hello there": {"__class__": "rlbottraining.grading.grader.Grader"}}'
         )
 
     def test_encode_exception(self):

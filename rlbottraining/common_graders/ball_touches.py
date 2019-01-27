@@ -26,8 +26,3 @@ class RecordBallTouches(Grader):
         self.touches.append(copy.deepcopy(latest_touch))
         # TODO: maybe impose a limit on the number of touches recorded? To prevent OOM and unnecessarily big datasets.
         return  # This grader never terminates the exercise.
-
-    def get_metrics(self) -> Mapping[str, Any]:
-        return {
-            'ball_touches': self.touches,
-        }

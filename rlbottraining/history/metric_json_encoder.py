@@ -3,9 +3,8 @@ import json
 
 from rlbot.training.training import Pass, Fail, Result, Exercise
 
-from rlbottraining.metrics.metric import Metric
-from rlbottraining.grading import GraderExercise, Grader
-
+from rlbottraining.history.metric import Metric
+from rlbottraining.grading.grader import Grader
 
 class MetricJsonEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -19,7 +18,7 @@ class MetricJsonEncoder(json.JSONEncoder):
             return json_dict
 
         # Best-effort encoding of some well known types which could get subclassed.
-        well_known_types = [Pass, Fail, Result, Exercise, GraderExercise, Grader]
+        well_known_types = [Pass, Fail, Result, Exercise, Grader]
         for cls in well_known_types:
             if not isinstance(obj, cls):
                 continue
@@ -44,8 +43,6 @@ class MetricJsonEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
         except Exception as e:
             return make_encode_error(e)
-
-
 
 
 def full_class_name_of(obj) -> str:

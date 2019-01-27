@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from rlbot.training.training import Pass, Fail, Grade
 
 from rlbottraining.grading.grader import Grader, TrainingTickPacket
-from rlbottraining.metrics.metric import Metric
+from rlbottraining.history.metric import Metric
 
 
 class FailOnTimeout(Grader):
