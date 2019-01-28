@@ -2,12 +2,19 @@ import json
 import random
 import urllib.request
 from pathlib import Path
-from typing import Mapping, Any
+from typing import Mapping, Any, List
 
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 from rlbot.utils.logging_utils import get_logger
 
-from ...grading import GraderExercise, StrikerGrader
+from rlbottraining.common_graders.goal_grader import StrikerGrader
+from rlbottraining.training_exercise import TrainingExercise, Playlist
+from rlbottraining.grading.grader import Grader
+from rlbottraining.grading.training_tick_packet import TrainingTickPacket
+from rlbottraining.common_graders.timeout import PassOnTimeout
+from rlbottraining.match_configs import make_empty_match_config
+from rlbottraining.paths import BotConfigs
+from rlbottraining.rng import SeededRandomNumberGenerator
 
 cache_dir = Path(__file__).absolute().parent / 'download_cache'
 logger_id = 'bakkesmod_importer'
@@ -18,15 +25,14 @@ URotation180 = float(32768)
 URotationToRadians = UCONST_Pi / URotation180
 
 
-class BakkesmodImportedExercise(GraderExercise):
-    def __init__(self, config_path: str, shot_id: str):
-        super().__init__(config_path)
+class BakkesmodImportedExercise(TrainingExercise):
+
+    def __init__(self, shot_id: str):
         self.shot_json = self._get_shot_json(shot_id)
-        self.shot_name: str = self.shot_json['name']
-        assert type(self.shot_name) is str
-        self.grader_class = StrikerGrader # TODO: decide based on shot_json.type
-        # Do a dry-run of make_game_state
-        assert isinstance(self.make_game_state(random.Random()), GameState)
+        super().__init__(
+            name=self.shot_json['name'],
+            grader=StrikerGrader()
+        )
 
     def _get_shot_json(self, shot_id: str):
         cache_file_path = cache_dir / 'shots' / f'{shot_id}.json'
@@ -36,9 +42,6 @@ class BakkesmodImportedExercise(GraderExercise):
             urllib.request.urlretrieve(url, cache_file_path)
         with open(cache_file_path) as f:
             return json.load(f)
-
-    def make_grader(self):
-        return self.grader_class()
 
     def make_game_state(self, rng) -> GameState:
         player_json = self.shot_json['start']['player']
@@ -92,7 +95,7 @@ class BakkesmodImportedExercise(GraderExercise):
     def _is_number(self, obj: Any) -> bool:
         return isinstance(obj, float) or isinstance(obj, int)
 
-def exercises_from_bakkesmod_playlist(config_path:str, playlist_id: str) -> Mapping[str, BakkesmodImportedExercise]:
+def exercises_from_bakkesmod_playlist(playlist_id: str) -> List[BakkesmodImportedExercise]:
     cache_file_path = cache_dir / 'playlists' / f'{playlist_id}.json'
     if not cache_file_path.exists():
         url = f'https://workshop.bakkesmod.com/maps/playlist/{playlist_id}/list'
@@ -101,9 +104,7 @@ def exercises_from_bakkesmod_playlist(config_path:str, playlist_id: str) -> Mapp
     with open(cache_file_path) as f:
         shots_ids = json.load(f)['shots'].split(',')
     # TODO: parallel download
-    exercises_list = [ BakkesmodImportedExercise(config_path, shot) for shot in shots_ids ]
-    exercises_dict = { ex.shot_name: ex for ex in exercises_list }
-    # TODO: Deal with conflicts in names gracefully (e.g. append shot_id's)
-    assert len(exercises_dict) == len(exercises_list), "Duplicate name in bakkesmod playlist"
-    return exercises_dict
+    return [ BakkesmodImportedExercise(shot_id) for shot_id in shots_ids ]
 
+def make_default_playlist() -> Playlist:
+    return exercises_from_bakkesmod_playlist('quJfnUJf22')

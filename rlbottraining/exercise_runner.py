@@ -41,9 +41,19 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
     any new changes to the Exercise. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
     """
-    should_restart_training = True
     seeds = infinite_seed_generator()
+
+    # load the playlist initially, keep trying if we fail
     playlist_factory = load_default_playlist(python_file_with_playlist)
+    playlist: Playlist = None
+    while playlist is None:
+        try:
+            playlist_factory = load_default_playlist(python_file_with_playlist)
+            playlist = playlist_factory()
+        except Exception:
+            traceback.print_exc()
+            time.sleep(1.0)
+
     with setup_manager_context() as setup_manager:
         while True:
             playlist = playlist_factory()

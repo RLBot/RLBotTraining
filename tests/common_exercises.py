@@ -57,5 +57,13 @@ class CommonExercisesTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             next(result_iter)
 
+    def test_ball_prediction(self):
+        from rlbottraining.common_exercises.bakkesmod_import.bakkesmod_importer import make_default_playlist
+        results = list(run_playlist(make_default_playlist()))
+        self.assertGreater(len(results), 2)
+        for result in results:
+            # All of these exercises are too advanced for SimpleBot.
+            self.assertIsInstance(result.grade, Fail)
+
 if __name__ == '__main__':
     unittest.main()
