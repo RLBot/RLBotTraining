@@ -9,11 +9,12 @@ from rlbot.utils.game_state_util import GameState
 from rlbot.utils.rendering.rendering_manager import RenderingManager
 from rlbot.utils.structures.game_data_struct import GameTickPacket
 
+from rlbottraining.grading.grader import Grader
 from rlbottraining.grading.training_tick_packet import TrainingTickPacket
+from rlbottraining.history.exercise_result import ExerciseResult
 from rlbottraining.history.match_config_io import ensure_match_config_on_disk
 from rlbottraining.rng import SeededRandomNumberGenerator
 from rlbottraining.training_exercise import TrainingExercise
-from rlbottraining.history.exercise_result import ExerciseResult
 
 class TrainingExerciseAdapter(RLBotExercise):
     """
@@ -22,6 +23,13 @@ class TrainingExerciseAdapter(RLBotExercise):
     It does this by wrapping the TrainingExercise and unwrapping the result.
     """
     def __init__(self, exercise: TrainingExercise, reproduce_key=Optional[str]):
+        # Do some sanity checks that the object looks correct
+        # In case the implementer of the exercise made a mistake with ordered arguments.
+        # note: prefer to use keyword arguments when using dataclasses
+        assert isinstance(exercise, TrainingExercise)
+        assert isinstance(exercise.grader, Grader)
+        assert isinstance(exercise.name, str)
+        assert isinstance(exercise.match_config, MatchConfig)
         self.exercise = exercise
         self.reproduce_key = reproduce_key
         self.training_tick_packet = TrainingTickPacket()
