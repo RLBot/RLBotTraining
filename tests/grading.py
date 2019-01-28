@@ -8,6 +8,7 @@ from rlbot.matchconfig.match_config import MatchConfig
 from rlbot.training.training import Exercise as RLBotExercise
 from rlbot.utils.game_state_util import GameState
 from rlbot.utils.structures.game_data_struct import GameTickPacket, GameInfo
+from rlbot.training.training import Fail
 
 from rlbottraining.common_graders.compound_grader import CompoundGrader
 from rlbottraining.common_graders.timeout import FailOnTimeout
@@ -35,6 +36,7 @@ class GradingTest(unittest.TestCase):
         fail_timeout = ex.on_tick(packet_with_time(13.75))
         self.assertIsNotNone(fail_timeout)
         self.assertIsInstance(fail_timeout, FailOnTimeout.FailDueToTimeout)
+        self.assertIsInstance(fail_timeout, Fail)
 
         match_config = ex.get_match_config()
         self.assertIs(match_config, test_match_config)
@@ -49,6 +51,7 @@ class GradingTest(unittest.TestCase):
         fail_timeout = ex.on_tick(packet_with_time(23.75))
         self.assertIsNotNone(fail_timeout)
         self.assertIsInstance(fail_timeout, FailOnTimeout.FailDueToTimeout)
+        self.assertIsInstance(fail_timeout, Fail)
 
 
     def test_player_events(self):

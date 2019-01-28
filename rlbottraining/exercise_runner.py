@@ -8,7 +8,7 @@ import importlib
 from rlbot.setup_manager import SetupManager, setup_manager_context
 from rlbot.training.training import Pass, run_exercises as _run_exercises, Result as _Result
 from rlbot.utils.logging_utils import get_logger
-from rlbot.utils.class_importer import load_external_class
+from rlbot.utils.class_importer import load_external_module
 
 from rlbottraining.training_exercise import TrainingExercise, Playlist
 from rlbottraining.training_exercise_adapter import TrainingExerciseAdapter
@@ -35,35 +35,35 @@ class ReloadPolicy:
     EACH_EXERCISE = 2
     # TODO: on .py file change in (sub-) directory
 
-def run_module(python_file_with_playlist: Path, reload_policy=ReloadPolicy.EACH_EXERCISE):
+def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = None, reload_policy=ReloadPolicy.EACH_EXERCISE):
     """
     This method repeatedly runs exercises in the module and reloads the module to pick up
     any new changes to the Exercise. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
     """
-    exercises = make_exercises(python_file_with_playlist)
+    playlist = load_default_exercises(python_file_with_playlist)
     should_restart_training = True
-    while should_restart_training:
-        should_restart_training = False
+    seeds = infinite_seed_generator()
+    with setup_manager_context() as setup_manager:
+        while True:
+            result_iter = _run_playlist(setup_manager, playlist, history_dir, next(seeds))
+            for result in result_iter:
+                print_result(result)
+                # TODO write result to disk
 
-        result_iter = _rlbot_run_exercises(exercises, seeds=infinite_seed_generator())
-        for name, result in result_iter:
-            print_result(result)
-
-            # Reload the module and apply the new exercises
-            if reload_policy == ReloadPolicy.EACH_EXERCISE:
-                try:
-                    new_exercises = make_exercises(python_file_with_playlist)
-                except Exception:
-                    traceback.print_exc()
-                    continue  # keep running previous exercises until new ones are fixed.
-                if new_exercises.keys() != exercises.keys():
-                    get_logger(LOGGER_ID).warn(f'Need to restart to pick up new exercises.')
-                    should_restart_training = True
-                    exercises = new_exercises
-                    break  # different set of exercises. Can't monkeypatch.
-                for ex_name, old_exercise in exercises.items():
-                    _monkeypatch_copy(new_exercises[ex_name], old_exercise)
+                # Reload the module and apply the new exercises
+                if reload_policy == ReloadPolicy.EACH_EXERCISE:
+                    try:
+                        new_playlist = load_default_exercises(python_file_with_playlist)
+                    except Exception:
+                        traceback.print_exc()
+                        continue  # keep running previous exercises until new ones are fixed.
+                    if len(new_playlist) != len(playlist) or any(e1.name != e2.name for e1,e2 in zip(new_playlist, playlist)):
+                        get_logger(LOGGER_ID).warn(f'Need to restart to pick up new exercises.')
+                        exercises = new_playlist
+                        break  # different set of exercises. Can't monkeypatch.
+                    for new_exercise, old_exercise in zip(new_playlist, playlist):
+                        _monkeypatch_copy(new_exercise, old_exercise)
 
 def infinite_seed_generator():
     yield 4
@@ -80,7 +80,7 @@ def print_result(result: ExerciseResult):
 def load_default_exercises(python_file_with_playlist: Path) -> Playlist:
     module = load_external_module(python_file_with_playlist)
     assert hasattr(module, 'make_default_playlist'), f'module "{python_file_with_playlist}" must provide a make_default_playlist() function to be able to used in run_module().'
-    return playlist.make_default_playlist()
+    return module.make_default_playlist()
 
 def _monkeypatch_copy(source, destination):
     """
