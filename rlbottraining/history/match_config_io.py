@@ -15,7 +15,7 @@ def ensure_match_config_on_disk(match_config: MatchConfig, history_dir: Path) ->
     json_str = json.dumps(match_config, cls=ConfigJsonEncoder, sort_keys=True)
     json_bytes = bytes(json_str, 'utf8')
     hexdigest = hashlib.sha256(json_bytes).hexdigest()
-    match_config_dir = history_dir / HistoryPaths.match_configs
+    match_config_dir = history_dir / HistoryPaths.reproducable_pickle_dir
     match_config_dir.mkdir(parents=True, exist_ok=True)
     hash_named_file = match_config_dir / f'{hexdigest}.json'
     if hash_named_file.exists():

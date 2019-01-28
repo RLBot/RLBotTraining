@@ -15,3 +15,4 @@
 - TODO: The generated website includes JS to to allow visualizations of the View Data.
 - TODO: Taylor may add their own visualization and additions to View Data by providing WebsiteExtension's when generating the website.
 - TODO: Taylor now can view nicely visualizied, aggregated results generated for their bot training and share this with others.
+- TODO: Taylor now can re-run exercises which had an odd outcome to debug problems in the bot.

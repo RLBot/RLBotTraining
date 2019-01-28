@@ -12,8 +12,6 @@ from rlbottraining.exercises.versus_line_goalie import VersusLineGoalie
 import rlbottraining.exercises.ball_prediction
 from rlbottraining.paths import BotConfigs, MatchConfigs
 
-# TODO: playlists.
-
 current_dir = Path(__file__).absolute().parent
 exercise_dir = current_dir / 'rlbottraining' / 'exercises'
 

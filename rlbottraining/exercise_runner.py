@@ -1,16 +1,15 @@
 from types import ModuleType
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Iterator
 import time
 import traceback
 from pathlib import Path
 import importlib
 
-from rlbot.training.training import Pass, run_all_exercises, Result
+from rlbot.training.training import Pass, run_exercises as _run_exercises, Result as _Result
 from rlbot.utils.logging_utils import get_logger
 from rlbot.utils.class_importer import load_external_class
 
-from .grading import GraderExercise
-from .playlist import Playlist
+from rlbottraining.training_exercise import TrainingExercise, Playlist
 
 LOGGER_ID = 'training'
 
@@ -28,16 +27,17 @@ def on_result(name: str, result: Result):
         get_logger(LOGGER_ID).warn(f'{name}: {grade}')
 
 
-def run_exercises(exercises: Dict[str, GraderExercise], infinite=False):
-    seeds = [4]
-    if infinite:
-        get_logger(LOGGER_ID).info('Running exercises repeatedly until Ctrl+C is pressed...')
-        seeds = infinite_seed_generator()
+def run_playlist(exercises: Playlist, history_dir: Optional[Path] = None, seed: int = 4) -> Iterator[Result]:
+    with setup_manager_context() as setup_manager:
+        yield from _run_playlist(setup_manager, exercises, history_dir, seed)
 
-    result_iter = run_all_exercises(exercises, seeds=seeds)
-    for name, result in result_iter:
-        on_result(name, result)
-        # TODO: put Metric into a database
+def _run_playlist(setup_manager: SetupManager, exercises: Playlist, history_dir: Optional[Path], seed: int) -> Iterator[Result]:
+    wrapped_exercises = [
+        TrainingExerciseAdapter(ex, make_reproducable(ex, seed, history_dir))
+        for ex in exercises
+    ]
+    for result in _run_exercises(setup_manager, wrapped_exercises, seed):
+        yield TrainingExerciseAdapter.unwrap_result(result)
 
 class ReloadPolicy:
     NEVER = 1
@@ -46,7 +46,7 @@ class ReloadPolicy:
 
 def run_module(python_file_with_playlist: Path, reload_policy=ReloadPolicy.EACH_EXERCISE):
     """
-    This method runs exercises in the module and reloads the module to pick up
+    This method repeatedly runs exercises in the module and reloads the module to pick up
     any new changes to the Exercise. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
     """
@@ -55,7 +55,7 @@ def run_module(python_file_with_playlist: Path, reload_policy=ReloadPolicy.EACH_
     while should_restart_training:
         should_restart_training = False
 
-        result_iter = run_all_exercises(exercises, seeds=infinite_seed_generator())
+        result_iter = _rlbot_run_exercises(exercises, seeds=infinite_seed_generator())
         for name, result in result_iter:
             on_result(name, result)
 

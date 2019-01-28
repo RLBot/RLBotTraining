@@ -186,6 +186,7 @@ def default_prediction_func() -> PredictionFunc:
     return prediction_func
 
 
-default_ball_prediction_playlist: Playlist = make_ball_prediction_exercises(
-    default_prediction_func()
-)
+def make_default_playlist() -> Playlist:
+    Playlist = make_ball_prediction_exercises(
+        default_prediction_func()
+    )

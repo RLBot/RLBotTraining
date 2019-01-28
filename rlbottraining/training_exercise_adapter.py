@@ -2,31 +2,35 @@ from random import Random
 from pathlib import Path
 from typing import Optional
 
-from rlbot.training.training import Exercise as RLBotExercise, Grade
-from rlbottraining.history.match_config_io import ensure_match_config_on_disk
+from rlbot.matchconfig.match_config import MatchConfig
+from rlbot.matchconfig.match_config import MatchConfig
+from rlbot.training.training import Exercise as RLBotExercise, Grade, Result as _Result
+from rlbot.utils.game_state_util import GameState
+from rlbot.utils.rendering.rendering_manager import RenderingManager
+from rlbot.utils.structures.game_data_struct import GameTickPacket
+
 from rlbottraining.grading.training_tick_packet import TrainingTickPacket
+from rlbottraining.history.match_config_io import ensure_match_config_on_disk
 from rlbottraining.rng import SeededRandomNumberGenerator
 from rlbottraining.training_exercise import TrainingExercise
-from rlbot.utils.game_state_util import GameState
-from rlbot.utils.structures.game_data_struct import GameTickPacket
-from rlbot.utils.rendering.rendering_manager import RenderingManager
-
+from rlbottraining.history.exercise_result import ExerciseResult
 
 class TrainingExerciseAdapter(RLBotExercise):
     """
     This class is designed to translate between the minimal RLBot training API
     and the convenient to use RLBotTraining API.
+    It does this by wrapping the TrainingExercise and unwrapping the result.
     """
-    def __init__(self, exercise: TrainingExercise, history_dir: Path):
+    def __init__(self, exercise: TrainingExercise, reproduce_key=Optional[str]):
         self.exercise = exercise
-        self.history_dir = history_dir
+        self.reproduce_key = reproduce_key
         self.training_tick_packet = TrainingTickPacket()
 
-    def get_config_path(self) -> str:
-        return str(ensure_match_config_on_disk(
-            self.exercise.match_config,
-            self.history_dir
-        ))
+    def get_name(self) -> str:
+        return self.exercise.name
+
+    def get_match_config(self) -> MatchConfig:
+        return self.exercise.match_config
 
     def setup(self, rng: Random) -> GameState:
         return self.exercise.make_game_state(
@@ -39,3 +43,13 @@ class TrainingExerciseAdapter(RLBotExercise):
 
     def render(self, renderer: RenderingManager):
         self.exercise.render(renderer)
+
+    @staticmethod
+    def unwrap_result(result: _Result) -> ExerciseResult:
+        self = result.exercise
+        return ExerciseResult(
+            exercise=self.exercise,
+            reproduce_key=self.reproduce_key,
+            grade=result.grade,
+            seed=result.seed,
+        )
