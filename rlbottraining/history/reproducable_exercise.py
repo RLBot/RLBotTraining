@@ -1,21 +1,26 @@
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional
 import pickle
 import time
+
+from rlbottraining.training_exercise import TrainingExercise
 
 
 @dataclass
 class ReproducableExercise:
     exercise: TrainingExercise
     seed: int
-    create_epoch_ms: long
+    create_epoch_ms: int
 
 
-def make_reproducable(exercise: TrainingExercise, seed: int, history_dir:Optional[Path]) -> Optional[str]:
+def make_reproducable(exercise: TrainingExercise, seed: int, history_dir: Optional[Path]) -> Optional[str]:
     """
     writes information to disk such that the training exercise can be reproduced later.
     Returns a reproduce_key which can be passed to reproduce_exercise() at a later point in time.
+    Returns None if history_dir is not provided
     """
-    if reproduce_key is None:
+    if history_dir is None:
         return None
 
     create_epoch_ms = int(time.time() * 1000)

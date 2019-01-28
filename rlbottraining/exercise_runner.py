@@ -1,37 +1,28 @@
 from types import ModuleType
-from typing import Dict, Tuple, Iterator
+from typing import Dict, Tuple, Iterator, Optional
 import time
 import traceback
 from pathlib import Path
 import importlib
 
+from rlbot.setup_manager import SetupManager, setup_manager_context
 from rlbot.training.training import Pass, run_exercises as _run_exercises, Result as _Result
 from rlbot.utils.logging_utils import get_logger
 from rlbot.utils.class_importer import load_external_class
 
 from rlbottraining.training_exercise import TrainingExercise, Playlist
+from rlbottraining.training_exercise_adapter import TrainingExerciseAdapter
+from rlbottraining.history.exercise_result import ExerciseResult
+from rlbottraining.history.reproducable_exercise import make_reproducable
 
 LOGGER_ID = 'training'
 
 
-def infinite_seed_generator():
-    yield 4
-    while True:
-        yield int(time.time() * 1000)
-
-def on_result(name: str, result: Result):
-    grade = result.grade
-    if isinstance(grade, Pass):
-        get_logger(LOGGER_ID).info(f'{name}: {grade}')
-    else:
-        get_logger(LOGGER_ID).warn(f'{name}: {grade}')
-
-
-def run_playlist(exercises: Playlist, history_dir: Optional[Path] = None, seed: int = 4) -> Iterator[Result]:
+def run_playlist(exercises: Playlist, history_dir: Optional[Path] = None, seed: int = 4) -> Iterator[ExerciseResult]:
     with setup_manager_context() as setup_manager:
         yield from _run_playlist(setup_manager, exercises, history_dir, seed)
 
-def _run_playlist(setup_manager: SetupManager, exercises: Playlist, history_dir: Optional[Path], seed: int) -> Iterator[Result]:
+def _run_playlist(setup_manager: SetupManager, exercises: Playlist, history_dir: Optional[Path], seed: int) -> Iterator[ExerciseResult]:
     wrapped_exercises = [
         TrainingExerciseAdapter(ex, make_reproducable(ex, seed, history_dir))
         for ex in exercises
@@ -57,7 +48,7 @@ def run_module(python_file_with_playlist: Path, reload_policy=ReloadPolicy.EACH_
 
         result_iter = _rlbot_run_exercises(exercises, seeds=infinite_seed_generator())
         for name, result in result_iter:
-            on_result(name, result)
+            print_result(result)
 
             # Reload the module and apply the new exercises
             if reload_policy == ReloadPolicy.EACH_EXERCISE:
@@ -74,10 +65,22 @@ def run_module(python_file_with_playlist: Path, reload_policy=ReloadPolicy.EACH_
                 for ex_name, old_exercise in exercises.items():
                     _monkeypatch_copy(new_exercises[ex_name], old_exercise)
 
-def make_exercises(python_file_with_playlist: Path) -> Dict[str, GraderExercise]:
-    cls_module = load_external_class(python_file_with_playlist, Playlist)
-    playlist: Playlist = cls_module[0]()
-    return playlist.make_exercises()
+def infinite_seed_generator():
+    yield 4
+    while True:
+        yield int(time.time() * 1000)
+
+def print_result(result: ExerciseResult):
+    grade = result.grade
+    if isinstance(grade, Pass):
+        get_logger(LOGGER_ID).info(f'{result.exercise.name}: {grade}')
+    else:
+        get_logger(LOGGER_ID).warn(f'{result.exercise.name}: {grade}')
+
+def load_default_exercises(python_file_with_playlist: Path) -> Playlist:
+    module = load_external_module(python_file_with_playlist)
+    assert hasattr(module, 'make_default_playlist'), f'module "{python_file_with_playlist}" must provide a make_default_playlist() function to be able to used in run_module().'
+    return playlist.make_default_playlist()
 
 def _monkeypatch_copy(source, destination):
     """

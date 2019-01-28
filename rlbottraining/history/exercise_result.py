@@ -7,5 +7,6 @@ from rlbottraining.training_exercise import TrainingExercise
 class ExerciseResult:
 
     seed: int
-    exercise: TrainingExercise
     grade: Grade
+    exercise: TrainingExercise
+    reproduce_key: str

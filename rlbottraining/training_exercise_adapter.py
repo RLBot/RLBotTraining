@@ -48,8 +48,8 @@ class TrainingExerciseAdapter(RLBotExercise):
     def unwrap_result(result: _Result) -> ExerciseResult:
         self = result.exercise
         return ExerciseResult(
+            seed=result.seed,
+            grade=result.grade,
             exercise=self.exercise,
             reproduce_key=self.reproduce_key,
-            grade=result.grade,
-            seed=result.seed,
         )

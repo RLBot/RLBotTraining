@@ -1,16 +1,19 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Optional, Callable, List
 from threading import Thread
 
-from rlbot.utils.structures.ball_prediction_struct import BallPrediction, Slice as BallAtTime
-from rlbot.utils.logging_utils import get_logger
+from rlbot.matchconfig.match_config import MatchConfig, PlayerConfig, Team
 from rlbot.training.training import Pass, Fail, Grade
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
-from rlbot.utils.structures.game_interface import GameInterface
+from rlbot.utils.logging_utils import get_logger
 from rlbot.utils.rendering.rendering_manager import RenderingManager
+from rlbot.utils.structures.ball_prediction_struct import BallPrediction, Slice as BallAtTime
+from rlbot.utils.structures.game_interface import GameInterface
 
-from rlbottraining.exercises.training_exercise import TrainingExercise, Playlist
-from rlbottraining.grading import Grader, TrainingTickPacket, Grader, PassOnTimeout
+from rlbottraining.training_exercise import TrainingExercise, Playlist
+from rlbottraining.grading.grader import Grader
+from rlbottraining.grading.training_tick_packet import TrainingTickPacket
+from rlbottraining.common_graders.timeout import PassOnTimeout
 from rlbottraining.match_configs import make_empty_match_config
 from rlbottraining.paths import BotConfigs
 from rlbottraining.rng import SeededRandomNumberGenerator
@@ -97,7 +100,7 @@ class FailOnInconsistentBallPrediction(Grader):
 ################### Exercise definitions ###################
 
 def make_ball_prediction_match_config() -> MatchConfig:
-    match_config = get_empty_training_config()
+    match_config = make_empty_match_config()
     match_config.player_configs = [
         # RocketLeague doesn't like being started without any players.
         PlayerConfig.bot_config(BotConfigs.brick_bot, Team.BLUE),
@@ -117,8 +120,8 @@ cars_in_goal = {
 }
 
 @dataclass
-BallPredictionExercise(TrainingExercise):
-    match_config = field(default_factory=make_ball_prediction_match_config)
+class BallPredictionExercise(TrainingExercise):
+    match_config: MatchConfig = field(default_factory=make_ball_prediction_match_config)
 
 @dataclass
 class PredictBallInAir(BallPredictionExercise):
@@ -187,6 +190,9 @@ def default_prediction_func() -> PredictionFunc:
 
 
 def make_default_playlist() -> Playlist:
-    Playlist = make_ball_prediction_exercises(
+    """
+    This special function gets called by run_module()
+    """
+    return make_ball_prediction_exercises(
         default_prediction_func()
     )
