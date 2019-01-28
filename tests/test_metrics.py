@@ -91,7 +91,7 @@ class MetricsTest(unittest.TestCase):
             passport_number: str
         self.assertEqual(
             encode(MyPassPort(passport_number='lol jk')),
-            '{"__class__": "tests.metrics.MyPassPort", "__isinstance_Pass__": true, "passport_number": "lol jk"}'
+            '{"__class__": "tests.test_metrics.MyPassPort", "__isinstance_Pass__": true, "passport_number": "lol jk"}'
         )
 
     def test_encode_grade_custom_subclass_with_nonencodable(self):
@@ -100,7 +100,7 @@ class MetricsTest(unittest.TestCase):
             passport_number: NonJsonEncodable
         self.assertEqual(
             encode(MyPassPort(passport_number=NonJsonEncodable())),
-            '{"__class__": "tests.metrics.MyPassPort", "__isinstance_Pass__": true, "passport_number": {"__encode_error__": {"__class__": "TypeError", "__isinstance_Exception__": true, "message": "Object of type NonJsonEncodable is not JSON serializable"}}}'
+            '{"__class__": "tests.test_metrics.MyPassPort", "__isinstance_Pass__": true, "passport_number": {"__encode_error__": {"__class__": "TypeError", "__isinstance_Exception__": true, "message": "Object of type NonJsonEncodable is not JSON serializable"}}}'
         )
 
     # def test_encode_result(self):
