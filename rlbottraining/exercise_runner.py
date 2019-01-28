@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import Dict, Tuple, Iterator, Optional
+from typing import Dict, Tuple, Iterator, Optional, Callable
 import time
 import traceback
 from pathlib import Path
@@ -41,11 +41,12 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
     any new changes to the Exercise. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
     """
-    playlist = load_default_exercises(python_file_with_playlist)
     should_restart_training = True
     seeds = infinite_seed_generator()
+    playlist_factory = load_default_playlist(python_file_with_playlist)
     with setup_manager_context() as setup_manager:
         while True:
+            playlist = playlist_factory()
             result_iter = _run_playlist(setup_manager, playlist, history_dir, next(seeds))
             for result in result_iter:
                 print_result(result)
@@ -54,13 +55,15 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
                 # Reload the module and apply the new exercises
                 if reload_policy == ReloadPolicy.EACH_EXERCISE:
                     try:
-                        new_playlist = load_default_exercises(python_file_with_playlist)
+                        new_playlist_factory = load_default_playlist(python_file_with_playlist)
+                        new_playlist = new_playlist_factory()
                     except Exception:
                         traceback.print_exc()
                         continue  # keep running previous exercises until new ones are fixed.
+                    playlist_factory = new_playlist_factory
                     if len(new_playlist) != len(playlist) or any(e1.name != e2.name for e1,e2 in zip(new_playlist, playlist)):
                         get_logger(LOGGER_ID).warn(f'Need to restart to pick up new exercises.')
-                        exercises = new_playlist
+                        playlist = new_playlist
                         break  # different set of exercises. Can't monkeypatch.
                     for new_exercise, old_exercise in zip(new_playlist, playlist):
                         _monkeypatch_copy(new_exercise, old_exercise)
@@ -77,10 +80,11 @@ def print_result(result: ExerciseResult):
     else:
         get_logger(LOGGER_ID).warn(f'{result.exercise.name}: {grade}')
 
-def load_default_exercises(python_file_with_playlist: Path) -> Playlist:
+def load_default_playlist(python_file_with_playlist: Path) -> Callable[[], Playlist]:
     module = load_external_module(python_file_with_playlist)
     assert hasattr(module, 'make_default_playlist'), f'module "{python_file_with_playlist}" must provide a make_default_playlist() function to be able to used in run_module().'
-    return module.make_default_playlist()
+    assert callable(module.make_default_playlist), 'make_default_playlist must be a function that returns TrainingExercise\'s'
+    return module.make_default_playlist
 
 def _monkeypatch_copy(source, destination):
     """

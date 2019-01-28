@@ -22,7 +22,6 @@ from rlbottraining.exercise_runner import run_module
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version=__version__)
-    print(arguments)
     if arguments['run_module']:
         run_module(
             Path(arguments['<python_file>']),

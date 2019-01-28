@@ -1,14 +1,15 @@
+from dataclasses import dataclass, field
+
 import random
 from math import pi
 from pathlib import Path
 
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
-from ..grading import GraderExercise, StrikerGrader, Grader
+from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
 
-
-class BallInFrontOfGoal(GraderExercise):
-
+@dataclass
+class BallInFrontOfGoal(StrikerExercise):
     def make_game_state(self, rng: random.Random) -> GameState:
         return GameState(
             ball=BallState(physics=Physics(
@@ -29,15 +30,12 @@ class BallInFrontOfGoal(GraderExercise):
             boosts={i: BoostState(0) for i in range(34)},
         )
 
-    def make_grader(self) -> Grader:
-        return StrikerGrader()
 
+@dataclass
+class FacingAwayFromBallInFrontOfGoal(StrikerExercise):
 
-class FacingAwayFromBallInFrontOfGoal(GraderExercise):
-    def __init__(self, config_path: Path, car_start_x: float, car_start_y: float = 3000):
-        super().__init__(config_path)
-        self.car_start_x = car_start_x
-        self.car_start_y = car_start_y
+    car_start_x: float = 0
+    car_start_y: float = 3000
 
     def make_game_state(self, rng: random.Random) -> GameState:
         return GameState(
@@ -59,13 +57,9 @@ class FacingAwayFromBallInFrontOfGoal(GraderExercise):
             boosts={i: BoostState(0) for i in range(34)},
         )
 
-    def make_grader(self) -> Grader:
-        return StrikerGrader()
-
 
 # The ball is rolling towards goal but you still need to put it in
-class RollingTowardsGoalShot(GraderExercise):
-
+class RollingTowardsGoalShot(StrikerExercise):
     def make_game_state(self, rng: random.Random) -> GameState:
         car_pos = Vector3(0, -2500, 25)
         ball_pos = Vector3(random.uniform(-1000, 1000), random.uniform(0, 1500), 100)
@@ -76,5 +70,13 @@ class RollingTowardsGoalShot(GraderExercise):
         game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
         return game_state
 
-    def make_grader(self) -> Grader:
-        return StrikerGrader()
+
+def make_default_playlist():
+    return [
+        BallInFrontOfGoal('Facing ball'),
+        FacingAwayFromBallInFrontOfGoal('Facing away from ball 1', car_start_x=1500.),
+        FacingAwayFromBallInFrontOfGoal('Facing away from ball 2', car_start_x=-400.),
+        FacingAwayFromBallInFrontOfGoal('Facing directly away from ball', car_start_x=0),
+        # FacingAwayFromBallInFrontOfGoal('Facing away from opponents goal', 200., car_start_y=5100),
+        # RollingTowardsGoalShot('Rolling Shot'),
+    ]

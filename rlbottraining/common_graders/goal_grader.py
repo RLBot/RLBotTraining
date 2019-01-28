@@ -1,6 +1,10 @@
 from rlbot.training.training import Pass, Fail
 
-from . import Grader, CompoundGrader, FailOnTimeout, PassOnTimeout, PlayerEventType, TrainingTickPacket
+from rlbottraining.grading.grader import Grader
+from rlbottraining.grading.event_detector import PlayerEventType
+from rlbottraining.grading.training_tick_packet import TrainingTickPacket
+from rlbottraining.common_graders.compound_grader import CompoundGrader
+from rlbottraining.common_graders.timeout import FailOnTimeout, PassOnTimeout
 
 
 class StrikerGrader(CompoundGrader):
@@ -9,10 +13,10 @@ class StrikerGrader(CompoundGrader):
     """
 
     def __init__(self, timeout_seconds=4.0, ally_team=0):
-        super().__init__({
-            'goal': PassOnGoalForAllyTeam(ally_team),
-            'timeout': FailOnTimeout(timeout_seconds),
-        })
+        super().__init__([
+            PassOnGoalForAllyTeam(ally_team),
+            FailOnTimeout(timeout_seconds),
+        ])
 
 
 class GoalieGrader(CompoundGrader):
@@ -21,11 +25,11 @@ class GoalieGrader(CompoundGrader):
     """
 
     def __init__(self, timeout_seconds=10.0, ally_team=0):
-        super().__init__({
-            'goalie save': PassOnBallGoingAwayFromGoal(ally_team),
-            'goal': PassOnGoalForAllyTeam(ally_team),
-            'timeout': PassOnTimeout(timeout_seconds),
-        })
+        super().__init__([
+            PassOnBallGoingAwayFromGoal(ally_team),
+            PassOnGoalForAllyTeam(ally_team),
+            PassOnTimeout(timeout_seconds),
+        ])
 
 
 class WrongGoalFail(Fail):
