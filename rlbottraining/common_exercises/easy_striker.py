@@ -35,7 +35,7 @@ class BallInFrontOfGoal(StrikerExercise):
 class FacingAwayFromBallInFrontOfGoal(StrikerExercise):
 
     car_start_x: float = 0
-    car_start_y: float = 3000
+    car_start_y: float = 2400
 
     def make_game_state(self, rng: random.Random) -> GameState:
         return GameState(
@@ -74,9 +74,9 @@ class RollingTowardsGoalShot(StrikerExercise):
 def make_default_playlist():
     return [
         BallInFrontOfGoal('Facing ball'),
+        FacingAwayFromBallInFrontOfGoal('Facing directly away from ball', car_start_x=0),
         FacingAwayFromBallInFrontOfGoal('Facing away from ball 1', car_start_x=1500.),
         FacingAwayFromBallInFrontOfGoal('Facing away from ball 2', car_start_x=-400.),
-        FacingAwayFromBallInFrontOfGoal('Facing directly away from ball', car_start_x=0),
-        # FacingAwayFromBallInFrontOfGoal('Facing away from opponents goal', 200., car_start_y=5100),
-        # RollingTowardsGoalShot('Rolling Shot'),
+        FacingAwayFromBallInFrontOfGoal('Facing away from opponents goal', car_start_x=200., car_start_y=5100),
+        RollingTowardsGoalShot('Rolling Shot'),
     ]
