@@ -1,12 +1,10 @@
 from dataclasses import dataclass, field
-
 from math import pi
-from pathlib import Path
 
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
-from rlbottraining.rng import SeededRandomNumberGenerator
 from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
+from rlbottraining.rng import SeededRandomNumberGenerator
 
 @dataclass
 class BallInFrontOfGoal(StrikerExercise):

@@ -1,15 +1,17 @@
-import random
+from dataclasses import dataclass
 from math import pi
 
 from rlbot.utils.game_state_util import GameState, BallState, CarState, Physics, Vector3, Rotator
 
-from ..grading import GraderExercise, StrikerGrader, Grader
+from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
+from rlbottraining.rng import SeededRandomNumberGenerator
 
 
-# A shot where you have to hook it to score
-class HookShot(GraderExercise):
+@dataclass
+class HookShot(StrikerExercise):
+    """A shot where you have to hook it to score"""
 
-    def make_game_state(self, rng: random.Random) -> GameState:
+    def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
         car_pos = Vector3(2000, 500, 25)
         ball_pos = Vector3(2000, 1000, 100)
         ball_state = BallState(Physics(location=ball_pos, velocity=Vector3(0, 1000, 0)))
@@ -20,5 +22,7 @@ class HookShot(GraderExercise):
         game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
         return game_state
 
-    def make_grader(self) -> Grader:
-        return StrikerGrader()
+def make_default_playlist():
+    return [
+        HookShot('HookShot'),
+    ]

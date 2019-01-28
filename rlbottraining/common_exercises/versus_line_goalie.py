@@ -1,14 +1,15 @@
-import random
+from dataclasses import dataclass
 from math import pi
 
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
-from ..grading import GraderExercise, GoalieGrader, Grader
+from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
+from rlbottraining.rng import SeededRandomNumberGenerator
 
+@dataclass
+class VersusLineGoalie(StrikerExercise):
 
-class VersusLineGoalie(GraderExercise):
-
-    def make_game_state(self, rng: random.Random) -> GameState:
+    def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
         vel_mul = rng.uniform(1.0, 2.1)
         return GameState(
             ball=BallState(physics=Physics(
@@ -40,5 +41,7 @@ class VersusLineGoalie(GraderExercise):
             boosts={i: BoostState(0) for i in range(34)},
         )
 
-    def make_grader(self) -> Grader:
-        return GoalieGrader()
+def make_default_playlist():
+    return [
+        VersusLineGoalie('VersusLineGoalie'),
+    ]
