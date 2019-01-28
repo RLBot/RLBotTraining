@@ -2,6 +2,7 @@ import unittest
 import json
 from dataclasses import dataclass, field
 
+from rlbottraining.history.metric import Metric
 
 from .utils.example_metrics import ExampleMetric, ExampleMetric2
 
