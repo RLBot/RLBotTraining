@@ -11,6 +11,7 @@ setuptools.setup(
     name='rlbottraining',
     packages=setuptools.find_packages(),
     install_requires=['rlbot', 'docopt'],
+    python_requires='>=3.7.0',
     version=__version__,
     description='A framework for writing custom Rocket League bots that run offline.',
     long_description=long_description,
