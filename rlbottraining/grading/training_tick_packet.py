@@ -2,7 +2,7 @@ from typing import List
 
 from rlbot.utils.structures.game_data_struct import GameTickPacket
 
-from . import PlayerEventDetector, PlayerEvent
+from rlbottraining.grading.event_detector import PlayerEventDetector, PlayerEvent
 
 
 class TrainingTickPacket:

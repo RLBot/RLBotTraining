@@ -9,6 +9,7 @@ your own exercises,
 _rlbot_training_dir = Path(__file__).absolute().parent
 _example_bot_dir = _rlbot_training_dir / 'example_bots'
 _match_config_dir = _rlbot_training_dir / 'rlbot_configs'
+_common_exercises_dir = _rlbot_training_dir / 'common_exercises'
 # You may rely on the ones below.
 
 class BotConfigs:
@@ -19,10 +20,26 @@ class BotConfigs:
     simple_bot = _example_bot_dir / 'simple_bot' / 'simple_bot.cfg'
     line_goalie = _example_bot_dir / 'line_goalie' / 'line_goalie.cfg'
 
-class MatchConfigs:
+class HistoryPaths:
     """
-    Contains paths to standard configs which would be applicable to many types of exercises.
+    Relative paths within the history directory which contains
+    metrics of past training runs.
     """
-    single_soccar = _match_config_dir / 'single_soccar.cfg'
-    single_soccar_brick_bot = _match_config_dir / 'single_soccar_brick_bot.cfg'
-    versus_line_goalie = _match_config_dir / 'versus_line_goalie.cfg'
+
+    # authoritative_data is a directory with files that contain the raw
+    # output of training runs.
+    # Files in here should be immutable with the caveat of data retention.
+    authoritative_data = Path('authoritative_data')
+
+    # # The match_configs directory contains JSON versions of match configs
+    # # which are named by a hash of their contents.
+    # #
+    # match_configs = authoritative_data / 'match_configs'
+
+    reproducable_exercises = authoritative_data / 'reproducable_exercises'
+    reproducable_pickle_dir = reproducable_exercises / 'pickle_jar'
+    # TODO: reproducable_zip = authoritative_data / 'reproducable_exercises'
+
+    # TODO
+    # results = authoritative_data / 'results'
+
