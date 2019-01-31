@@ -19,10 +19,14 @@ setuptools.setup(
     author='RLBot Community',
     author_email='rlbotofficial@gmail.com',
     url='https://github.com/RLBot/RLBotTraining',
-    keywords=['rocket-league'],
+    keywords=['rocket-league', 'training', 'train'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: Microsoft :: Windows",
     ],
+    entry_points={
+        # Allow people to run `rlbottraining` instead of `python -m rlbottraining`
+        'console_scripts': ['rlbottraining = rlbottraining.__main__:main']
+    },
 )

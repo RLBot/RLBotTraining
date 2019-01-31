@@ -1,8 +1,13 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 release_notes = {
+
+    '0.1.1': '''
+        - Started releasing to pypi - DomNomNom
+        - Allowed people to run the module without typing "python -m" - DomNomNom
+    ''',
 
     '0.1.0': '''
         - Start doing release notes - DomNomNom
