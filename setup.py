@@ -10,10 +10,13 @@ with open("README.md", "r") as readme_file:
 setuptools.setup(
     name='rlbottraining',
     packages=setuptools.find_packages(),
-    install_requires=['rlbot', 'docopt'],
+    install_requires=[
+        'rlbot>=1.12.7',
+        'docopt',
+    ],
     python_requires='>=3.7.0',
     version=__version__,
-    description='A framework for writing custom Rocket League bots that run offline.',
+    description='A framework for writing training for Rocket League bots.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='RLBot Community',
