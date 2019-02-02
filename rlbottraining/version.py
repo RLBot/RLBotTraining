@@ -1,11 +1,12 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 release_notes = {
 
-    '0.1.2': '''
+    '0.1.3': '''
         - Started releasing to pypi - DomNomNom
+        - Added versioned dependency on rlbot - DomNomNom
         - Allowed people to run the module without typing "python -m" - DomNomNom
         - Make MIT Licence show up in `pip show rlbottraining` -DomNomNom
     ''',
