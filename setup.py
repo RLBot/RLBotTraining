@@ -20,6 +20,7 @@ setuptools.setup(
     author_email='rlbotofficial@gmail.com',
     url='https://github.com/RLBot/RLBotTraining',
     keywords=['rocket-league', 'training', 'train'],
+    license='MIT License',
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
