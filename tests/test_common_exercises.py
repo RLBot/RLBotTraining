@@ -56,15 +56,15 @@ class CommonExercisesTest(unittest.TestCase):
             ['FailDueToTimeout']
         )
 
-    def test_easy_goalie(self):
-        from rlbottraining.common_exercises.easy_goalie import make_default_playlist
+    def test_bronze_goalie(self):
+        from rlbottraining.common_exercises.bronze_goalie import make_default_playlist
         self.assertGrades(
             run_playlist(make_default_playlist()),
             ['Pass']
         )
 
-    def test_easy_striker(self):
-        from rlbottraining.common_exercises.easy_striker import make_default_playlist
+    def test_bronze_striker(self):
+        from rlbottraining.common_exercises.bronze_striker import make_default_playlist
         result_iter = run_playlist(make_default_playlist())
 
         result = next(result_iter)
@@ -97,15 +97,15 @@ class CommonExercisesTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             next(result_iter)
 
-    def test_medium_goalie(self):
-        from rlbottraining.common_exercises.medium_goalie import make_default_playlist
+    def test_silver_goalie(self):
+        from rlbottraining.common_exercises.silver_goalie import make_default_playlist
         self.assertGrades(
             run_playlist(make_default_playlist()),
             ['WrongGoalFail', 'WrongGoalFail', 'WrongGoalFail']
         )
 
-    def test_medium_striker(self):
-        from rlbottraining.common_exercises.medium_striker import make_default_playlist
+    def test_silver_striker(self):
+        from rlbottraining.common_exercises.silver_striker import make_default_playlist
         self.assertGrades(
             run_playlist(make_default_playlist()),
             ['FailDueToTimeout']
