@@ -1,3 +1,5 @@
+rlbottraining/exercise_data_cache_dir
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

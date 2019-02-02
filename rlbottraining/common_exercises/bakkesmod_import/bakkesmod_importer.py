@@ -13,7 +13,7 @@ from rlbottraining.grading.grader import Grader
 from rlbottraining.grading.training_tick_packet import TrainingTickPacket
 from rlbottraining.common_graders.timeout import PassOnTimeout
 from rlbottraining.match_configs import make_empty_match_config
-from rlbottraining.paths import BotConfigs
+from rlbottraining.paths import ExerciseDataCache
 from rlbottraining.rng import SeededRandomNumberGenerator
 
 cache_dir = Path(__file__).absolute().parent / 'download_cache'
@@ -35,7 +35,8 @@ class BakkesmodImportedExercise(TrainingExercise):
         )
 
     def _get_shot_json(self, shot_id: str):
-        cache_file_path = cache_dir / 'shots' / f'{shot_id}.json'
+        ExerciseDataCache.bakkesmod_shots_dir.mkdir(parents=True, exist_ok=True)
+        cache_file_path = ExerciseDataCache.bakkesmod_shots_dir / f'{shot_id}.json'
         if not cache_file_path.exists():
             url = f'https://workshop.bakkesmod.com/static/shots/{shot_id}.json'
             get_logger(logger_id).info(f'Downloading: {url}')
@@ -96,7 +97,8 @@ class BakkesmodImportedExercise(TrainingExercise):
         return isinstance(obj, float) or isinstance(obj, int)
 
 def exercises_from_bakkesmod_playlist(playlist_id: str) -> List[BakkesmodImportedExercise]:
-    cache_file_path = cache_dir / 'playlists' / f'{playlist_id}.json'
+    ExerciseDataCache.bakkesmod_shots_dir.mkdir(parents=True, exist_ok=True)
+    cache_file_path = ExerciseDataCache.bakkesmod_shots_dir / f'{playlist_id}.json'
     if not cache_file_path.exists():
         url = f'https://workshop.bakkesmod.com/maps/playlist/{playlist_id}/list'
         get_logger(logger_id).info(f'Downloading: {url}')

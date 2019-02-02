@@ -3,7 +3,7 @@ from pathlib import Path
 from rlbot.matchconfig.conversions import read_match_config_from_file
 from rlbot.matchconfig.match_config import MatchConfig, PlayerConfig, Team
 
-from rlbottraining.paths import BotConfigs
+from rlbottraining.paths import BotConfigs, _match_config_dir
 
 def make_empty_match_config() -> MatchConfig:
     """
@@ -12,7 +12,7 @@ def make_empty_match_config() -> MatchConfig:
     what get_default_match_config() does.
     Has some mutators which are usually useful for bot training.
     """
-    config_path = Path(__file__).absolute().parent / 'empty_soccar.cfg'
+    config_path = _match_config_dir / 'empty_soccar.cfg'
     return read_match_config_from_file(config_path)
 
 def make_default_match_config() -> MatchConfig:

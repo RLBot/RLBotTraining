@@ -1,15 +1,20 @@
 from pathlib import Path
 
 """
-This file contains a few paths to configs / bots which might be handy to build
-your own exercises,
+This file contains a few paths to files (e.g. configs / bots)  which might be
+handy to build your own exercises with.
+Note: if there are data files which should be included as part of the package,
+please also update setup.py
 """
 
-# Do not rely on these private ones - they allow rlbottraining to be refactored later.
+# Do not rely on these private ones for your exercises.
+# They allow rlbottraining to be refactored later.
 _rlbot_training_dir = Path(__file__).absolute().parent
 _example_bot_dir = _rlbot_training_dir / 'example_bots'
 _match_config_dir = _rlbot_training_dir / 'rlbot_configs'
 _common_exercises_dir = _rlbot_training_dir / 'common_exercises'
+_exercise_data_cache_dir = _rlbot_training_dir / 'exercise_data_cache_dir'
+_match_config_dir = _rlbot_training_dir / 'match_configs'
 # You may rely on the ones below.
 
 class BotConfigs:
@@ -42,4 +47,14 @@ class HistoryPaths:
 
     # TODO
     # results = authoritative_data / 'results'
+
+class ExerciseDataCache:
+    """
+    Contains places where exercise may persist temporary files.
+    Directories here may need to be created first when written to.
+    """
+    bakkesmod_cache_dir = _exercise_data_cache_dir / 'bakkesmod_cache'
+    bakkesmod_shots_dir = bakkesmod_cache_dir / 'shots'
+    bakkesmod_playlists_dir = bakkesmod_cache_dir / 'playlists'
+
 
