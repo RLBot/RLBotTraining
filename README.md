@@ -4,18 +4,19 @@ Customizable training for Rocket Leage bots of any language.
 
 ## Installation
 
- - Install [RLBot](http://www.rlbot.org/)
- - Clone this repo (`RLBot/RLBotTraining`)
- - Run the file `run_exercises.bat`
+ - Install Python 3.7 or later
+ - `pip install rlbottraining`
 
 
 ## Features at a glance
 
  - Uses `RLBot` config files to support bots in any programming language
- - Reproducable training setups with randomness
+ - Reproducable training setups with seeded randomness
  - Customizable Pass/Fail criteria
  - Importing of shots/playlists from BakkesMod training
-
+ - Playlists of exercises
+ - Automatic reloading of both bot and exercise code.
+ - Imports from bakkesmod training
 
 ## Architecture
 
@@ -34,9 +35,7 @@ Customizable training for Rocket Leage bots of any language.
 
 ## Future direction
 
- - Provide playlists
  - Provide an example of striker vs goalie
- - Changes in exercise/grader source files automatically restarts the tests
  - Allow imports from RocketLeague Training
  - Put metrics (`Grader.get_metrics()`) into a database
  - A way of browsing past runs, including metrics
