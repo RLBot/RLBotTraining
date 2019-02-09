@@ -5,6 +5,7 @@ from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarSta
 
 from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
 from rlbottraining.rng import SeededRandomNumberGenerator
+from rlbottraining.training_exercise import Playlist
 
 @dataclass
 class VersusLineGoalie(StrikerExercise):
@@ -41,7 +42,7 @@ class VersusLineGoalie(StrikerExercise):
             boosts={i: BoostState(0) for i in range(34)},
         )
 
-def make_default_playlist():
+def make_default_playlist() -> Playlist:
     return [
         VersusLineGoalie('VersusLineGoalie'),
     ]

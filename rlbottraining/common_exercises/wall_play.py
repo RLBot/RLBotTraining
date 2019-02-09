@@ -4,6 +4,7 @@ from rlbot.utils.game_state_util import GameState, BallState, CarState, Physics,
 
 from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
 from rlbottraining.rng import SeededRandomNumberGenerator
+from rlbottraining.training_exercise import Playlist
 
 
 @dataclass
@@ -19,7 +20,7 @@ class BallRollingTowardsWall(StrikerExercise):
         game_state = GameState(ball=ball_state, cars={0: car_state})
         return game_state
 
-def make_default_playlist():
+def make_default_playlist() -> Playlist:
     return [
         BallRollingTowardsWall('BallRollingTowardsWall'),
     ]

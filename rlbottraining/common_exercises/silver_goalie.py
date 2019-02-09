@@ -7,7 +7,7 @@ from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarSta
 
 from rlbottraining.common_exercises.common_base_exercises import GoalieExercise
 from rlbottraining.rng import SeededRandomNumberGenerator
-
+from rlbottraining.training_exercise import Playlist
 
 
 @dataclass
@@ -55,7 +55,7 @@ class TryNotToOwnGoal(GoalieExercise):
         game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
         return game_state
 
-def make_default_playlist():
+def make_default_playlist() -> Playlist:
     return [
         DefendBallRollingTowardsGoal('DefendBallRollingTowardsGoal'),
         LineSave('LineSave'),

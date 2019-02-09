@@ -5,6 +5,7 @@ from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarSta
 
 from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
 from rlbottraining.rng import SeededRandomNumberGenerator
+from rlbottraining.training_exercise import Playlist
 
 @dataclass
 class BallInFrontOfGoal(StrikerExercise):
@@ -74,7 +75,7 @@ class RollingTowardsGoalShot(StrikerExercise):
         return game_state
 
 
-def make_default_playlist():
+def make_default_playlist() -> Playlist:
     return [
         BallInFrontOfGoal('Facing ball'),
         RollingTowardsGoalShot('Rolling Shot'),
