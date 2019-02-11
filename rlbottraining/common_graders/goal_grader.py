@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from typing import List
+
 from rlbot.training.training import Pass, Fail
 
 from rlbottraining.grading.grader import Grader
@@ -37,6 +40,7 @@ class WrongGoalFail(Fail):
         return f'{super().__repr__()}: Ball went into the wrong goal.'
 
 
+@dataclass
 class PassOnGoalForAllyTeam(Grader):
     """
     Terminates the Exercise when any goal is scored.
@@ -44,11 +48,7 @@ class PassOnGoalForAllyTeam(Grader):
     otherwise returns a Fail.
     """
 
-    def __init__(self, ally_team: int):
-        """
-        :param ally_team: number equal to game_datastruct.PlayerInfo.team.
-        """
-        self.ally_team = ally_team
+    ally_team: int  # The team ID, as in game_datastruct.PlayerInfo.team
 
     def on_tick(self, tick: TrainingTickPacket):
         for event in tick.player_events:
