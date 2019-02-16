@@ -1,16 +1,17 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 release_notes = {
 
-    '0.1.5': '''
+    '0.1.6': '''
         - Started releasing to pypi - DomNomNom
         - Added versioned dependency on rlbot - DomNomNom
         - Allowed people to run the module without typing "python -m" - DomNomNom
         - Make MIT Licence show up in `pip show rlbottraining` - DomNomNom
         - Moved paths into the paths file - DomNomNom
         - Renamed exercises to give a slightly less arbitrary categorization - DomNomNom
+        - Fixed goal grader not failing when there is a goal without a player touch - DomNomNom
     ''',
 
     '0.1.0': '''

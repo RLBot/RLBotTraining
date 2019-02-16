@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Optional, Mapping, Union
 
 from rlbot.training.training import Pass, Fail
 
@@ -49,19 +49,31 @@ class PassOnGoalForAllyTeam(Grader):
     """
 
     ally_team: int  # The team ID, as in game_datastruct.PlayerInfo.team
+    init_score: Optional[Mapping[int, int]] = None
 
-    def on_tick(self, tick: TrainingTickPacket):
-        for event in tick.player_events:
-            if event.type == PlayerEventType.GOALS:
-                if event.player.team == self.ally_team:
-                    return Pass()
-                else:
-                    return WrongGoalFail()
-            elif event.type == PlayerEventType.OWN_GOALS:
-                if event.player.team == self.ally_team:
-                    return WrongGoalFail()
-                else:
-                    return Pass()
+    def on_tick(self, tick: TrainingTickPacket) -> Optional[Union[Pass, WrongGoalFail]]:
+        score = {
+            team.team_index: team.score
+            for team in tick.game_tick_packet.teams
+        }
+
+        # Initialize or re-initialize due to some major change in the tick packet.
+        if (
+            self.init_score is None
+            or score.keys() != self.init_score.keys()
+            or any(score[t] < self.init_score[t] for t in self.init_score)
+        ):
+            self.init_score = score
+            return
+
+        scoring_team_id = None
+        for team_id in self.init_score:
+            if self.init_score[team_id] < score[team_id]:  # team score value has increased
+                assert scoring_team_id is None, "Only one team should score per tick."
+                scoring_team_id = team_id
+
+        if scoring_team_id is not None:
+            return Pass() if team_id == self.ally_team else WrongGoalFail()
 
 
 class PassOnBallGoingAwayFromGoal(Grader):
@@ -81,7 +93,7 @@ class PassOnBallGoingAwayFromGoal(Grader):
         self.ally_team = ally_team
         self.consequtive_good_ticks = 0
 
-    def on_tick(self, tick: TrainingTickPacket):
+    def on_tick(self, tick: TrainingTickPacket) -> Optional[Union[Pass, WrongGoalFail]]:
         to_own_goal = 1 if self.ally_team == 0 else -1
         if tick.game_tick_packet.game_ball.physics.velocity.y * to_own_goal > 0:
             self.consequtive_good_ticks += 1
