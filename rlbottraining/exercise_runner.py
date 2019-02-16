@@ -44,7 +44,7 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
     seeds = infinite_seed_generator()
 
     # load the playlist initially, keep trying if we fail
-    playlist_factory = load_default_playlist(python_file_with_playlist)
+    playlist_factory = None
     playlist: Playlist = None
     while playlist is None:
         try:
