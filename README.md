@@ -1,9 +1,7 @@
 # RLBotTraining
 Customizable training for Rocket Leage bots of any language.
 
-## Tutorial
-
-[Youtube Miniseries](https://youtu.be/uGFmOZCpel8?list=PL6LKXu1RlPdxh9vxmG1y2sghQwK47_gCH)
+## Tutorial: [Click Here](https://youtu.be/uGFmOZCpel8?list=PL6LKXu1RlPdxh9vxmG1y2sghQwK47_gCH)
 
 ## Installation
 
