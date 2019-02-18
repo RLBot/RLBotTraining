@@ -73,7 +73,7 @@ class PassOnGoalForAllyTeam(Grader):
                 scoring_team_id = team_id
 
         if scoring_team_id is not None:
-            return Pass() if team_id == self.ally_team else WrongGoalFail()
+            return Pass() if scoring_team_id == self.ally_team else WrongGoalFail()
 
 
 class PassOnBallGoingAwayFromGoal(Grader):
