@@ -1,5 +1,5 @@
 # RLBotTraining
-Customizable training for Rocket Leage bots of any language.
+Customizable training for Rocket League bots of any language.
 
 ## Tutorial: [Click Here](https://youtu.be/uGFmOZCpel8?list=PL6LKXu1RlPdxh9vxmG1y2sghQwK47_gCH)
 
