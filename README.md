@@ -1,6 +1,9 @@
 # RLBotTraining
 Customizable training for Rocket Leage bots of any language.
 
+## Tutorial
+
+[Youtube Miniseries](https://youtu.be/uGFmOZCpel8?list=PL6LKXu1RlPdxh9vxmG1y2sghQwK47_gCH)
 
 ## Installation
 
@@ -15,7 +18,7 @@ Customizable training for Rocket Leage bots of any language.
  - Customizable Pass/Fail criteria
  - Importing of shots/playlists from BakkesMod training
  - Playlists of exercises
- - Automatic reloading of both bot and exercise code.
+ - Automatic reloading of both bot and exercise code
  - Imports from bakkesmod training
 
 ## Architecture
@@ -36,7 +39,6 @@ Customizable training for Rocket Leage bots of any language.
 ## Future direction
 
  - Provide an example of striker vs goalie
- - Allow imports from RocketLeague Training
  - Put metrics (`Grader.get_metrics()`) into a database
  - A way of browsing past runs, including metrics
  - Reproducing failed exercises
