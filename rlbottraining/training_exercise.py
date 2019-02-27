@@ -6,11 +6,12 @@ from rlbot.utils.game_state_util import GameState
 from rlbot.utils.rendering.rendering_manager import RenderingManager
 
 from rlbottraining.grading.grader import Grader
-from rlbottraining.rng import SeededRandomNumberGenerator
+from rlbottraining.history.metric import Metric
 from rlbottraining.match_configs import make_default_match_config
+from rlbottraining.rng import SeededRandomNumberGenerator
 
 @dataclass
-class TrainingExercise:
+class TrainingExercise(Metric):
     name: str
     grader: Grader
     match_config: MatchConfig = field(default_factory=make_default_match_config)

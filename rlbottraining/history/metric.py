@@ -1,3 +1,4 @@
+import types
 from typing import Dict, Any
 
 class Metric:
@@ -12,4 +13,10 @@ class Metric:
         Only necessary to override this if you hold a non-JSON-serializable
         object that is not supported by RLBotTraining's MetricJsonEncoder.
         """
-        return self.__dict__.copy()
+        return {
+            k: v for k,v in self.__dict__.items()
+            if (
+                not (k.startswith('__') and k.endswith('__')) and
+                not isinstance(v, types.MethodType)
+            )
+        }

@@ -5,6 +5,8 @@ from rlbot.training.training import Pass, Fail, Result, Exercise
 
 from rlbottraining.history.metric import Metric
 from rlbottraining.grading.grader import Grader
+from rlbot.matchconfig.match_config import MatchConfig
+from rlbot.matchconfig.conversions import ConfigJsonEncoder
 
 class MetricJsonEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -38,9 +40,10 @@ class MetricJsonEncoder(json.JSONEncoder):
         # Be permissive - propagate some things rather than failing to encode anything.
         # As a downside, we need to be more careful when reading these json objects back in
         # As an upside, we can diagnose what was wrong at a later point in time.
+        if not hasattr(self, 'default_encoder'):
+            self.default_encoder = ConfigJsonEncoder()
         try:
-            # Let the base class default method raise the TypeError
-            return json.JSONEncoder.default(self, obj)
+            return self.default_encoder.default(obj)
         except Exception as e:
             return make_encode_error(e)
 

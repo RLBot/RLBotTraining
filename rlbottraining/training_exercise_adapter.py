@@ -22,7 +22,7 @@ class TrainingExerciseAdapter(RLBotExercise):
     and the convenient to use RLBotTraining API.
     It does this by wrapping the TrainingExercise and unwrapping the result.
     """
-    def __init__(self, exercise: TrainingExercise, reproduce_key=Optional[str]):
+    def __init__(self, exercise: TrainingExercise):
         # Do some sanity checks that the object looks correct
         # In case the implementer of the exercise made a mistake with ordered arguments.
         # note: prefer to use keyword arguments when using dataclasses
@@ -31,7 +31,6 @@ class TrainingExerciseAdapter(RLBotExercise):
         assert isinstance(exercise.name, str)
         assert isinstance(exercise.match_config, MatchConfig)
         self.exercise = exercise
-        self.reproduce_key = reproduce_key
         self.training_tick_packet = TrainingTickPacket()
 
     def get_name(self) -> str:
@@ -51,13 +50,3 @@ class TrainingExerciseAdapter(RLBotExercise):
 
     def render(self, renderer: RenderingManager):
         self.exercise.render(renderer)
-
-    @staticmethod
-    def unwrap_result(result: _Result) -> ExerciseResult:
-        self = result.exercise
-        return ExerciseResult(
-            seed=result.seed,
-            grade=result.grade,
-            exercise=self.exercise,
-            reproduce_key=self.reproduce_key,
-        )
