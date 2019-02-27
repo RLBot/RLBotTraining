@@ -36,17 +36,7 @@ class HistoryPaths:
     # Files in here should be immutable with the caveat of data retention.
     authoritative_data = Path('authoritative_data')
 
-    # # The match_configs directory contains JSON versions of match configs
-    # # which are named by a hash of their contents.
-    # #
-    # match_configs = authoritative_data / 'match_configs'
-
-    reproducable_exercises = authoritative_data / 'reproducable_exercises'
-    reproducable_pickle_dir = reproducable_exercises / 'pickle_jar'
-    # TODO: reproducable_zip = authoritative_data / 'reproducable_exercises'
-
-    # TODO
-    # results = authoritative_data / 'results'
+    exercise_results = authoritative_data / 'exercise_results'
 
 class ExerciseDataCache:
     """

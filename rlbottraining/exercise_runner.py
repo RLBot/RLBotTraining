@@ -1,34 +1,30 @@
+from pathlib import Path
 from types import ModuleType
 from typing import Dict, Tuple, Iterator, Optional, Callable
+import importlib
 import time
 import traceback
-from pathlib import Path
-import importlib
 
 from rlbot.setup_manager import SetupManager, setup_manager_context
-from rlbot.training.training import Pass, run_exercises as _run_exercises, Result as _Result
+from rlbot.training.training import run_exercises as _run_exercises, Result as _Result
 from rlbot.utils.logging_utils import get_logger
 from rlbot.utils.class_importer import load_external_module
 
 from rlbottraining.training_exercise import TrainingExercise, Playlist
 from rlbottraining.training_exercise_adapter import TrainingExerciseAdapter
-from rlbottraining.history.exercise_result import ExerciseResult
-from rlbottraining.history.reproducable_exercise import make_reproducable
+from rlbottraining.history.exercise_result import ExerciseResult, ReproductionInfo, log_result, store_result
 
 LOGGER_ID = 'training'
 
 
-def run_playlist(exercises: Playlist, history_dir: Optional[Path] = None, seed: int = 4) -> Iterator[ExerciseResult]:
-    with setup_manager_context() as setup_manager:
-        yield from _run_playlist(setup_manager, exercises, history_dir, seed)
-
-def _run_playlist(setup_manager: SetupManager, exercises: Playlist, history_dir: Optional[Path], seed: int) -> Iterator[ExerciseResult]:
-    wrapped_exercises = [
-        TrainingExerciseAdapter(ex, make_reproducable(ex, seed, history_dir))
-        for ex in exercises
-    ]
-    for result in _run_exercises(setup_manager, wrapped_exercises, seed):
-        yield TrainingExerciseAdapter.unwrap_result(result)
+# def run_playlist(exercises: Playlist, history_dir: Optional[Path] = None, seed: int = 4) -> Iterator[ExerciseResult]:
+#     with setup_manager_context() as setup_manager:
+#         wrapped_exercises = [
+#             TrainingExerciseAdapter(ex, make_reproducable(ex, seed, history_dir))
+#             for ex in exercises
+#         ]
+#         for result in _run_exercises(setup_manager, wrapped_exercises, seed):
+#             yield TrainingExerciseAdapter.unwrap_result(result)
 
 class ReloadPolicy:
     NEVER = 1
@@ -41,7 +37,6 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
     any new changes to the Exercise. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
     """
-    seeds = infinite_seed_generator()
 
     # load the playlist initially, keep trying if we fail
     playlist_factory = None
@@ -54,13 +49,27 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
             traceback.print_exc()
             time.sleep(1.0)
 
+    log = get_logger(LOGGER_ID)
     with setup_manager_context() as setup_manager:
-        while True:
+        for seed in infinite_seed_generator():
             playlist = playlist_factory()
-            result_iter = _run_playlist(setup_manager, playlist, history_dir, next(seeds))
-            for result in result_iter:
-                print_result(result)
-                # TODO write result to disk
+            wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
+            result_iter = _run_exercises(setup_manager, wrapped_exercises, seed)
+
+            for i, rlbot_result in enumerate(result_iter):
+                result = ExerciseResult(
+                    grade=rlbot_result.grade,
+                    exercise=rlbot_result.exercise.exercise,  # unwrap the TrainingExerciseAdapter.
+                    reproduction_info=ReproductionInfo(
+                        seed=seed,
+                        python_file_with_playlist=str(python_file_with_playlist.absolute()),
+                        playlist_index=i,
+                    )
+                )
+
+                log_result(result, log)
+                if history_dir:
+                    store_result(result, history_dir)
 
                 # Reload the module and apply the new exercises
                 if reload_policy == ReloadPolicy.EACH_EXERCISE:
@@ -72,28 +81,18 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
                         continue  # keep running previous exercises until new ones are fixed.
                     playlist_factory = new_playlist_factory
                     if len(new_playlist) != len(playlist) or any(e1.name != e2.name for e1,e2 in zip(new_playlist, playlist)):
-                        get_logger(LOGGER_ID).warn(f'Need to restart to pick up new exercises.')
+                        log.warn(f'Need to restart to pick up new exercises.')
                         playlist = new_playlist
                         break  # different set of exercises. Can't monkeypatch.
                     for new_exercise, old_exercise in zip(new_playlist, playlist):
                         _monkeypatch_copy(new_exercise, old_exercise)
+
 
 def infinite_seed_generator():
     yield 4
     while True:
         yield int(time.time() * 1000)
 
-def print_result(result: ExerciseResult):
-    log = get_logger(LOGGER_ID)
-    try:
-        grade_str = str(result.grade)
-    except Exception as e:
-        get_logger(LOGGER_ID).error(f'could not format grade: {e}')
-        return
-    if isinstance(result.grade, Pass):
-        get_logger(LOGGER_ID).info(f'{result.exercise.name}: {grade_str}')
-    else:
-        get_logger(LOGGER_ID).warn(f'{result.exercise.name}: {grade_str}')
 
 def load_default_playlist(python_file_with_playlist: Path) -> Callable[[], Playlist]:
     module = load_external_module(python_file_with_playlist)
