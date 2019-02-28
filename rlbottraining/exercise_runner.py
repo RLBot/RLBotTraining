@@ -16,15 +16,18 @@ from rlbottraining.history.exercise_result import ExerciseResult, ReproductionIn
 
 LOGGER_ID = 'training'
 
-# FIXME
-# def run_playlist(exercises: Playlist, history_dir: Optional[Path] = None, seed: int = 4) -> Iterator[ExerciseResult]:
-#     with setup_manager_context() as setup_manager:
-#         wrapped_exercises = [
-#             TrainingExerciseAdapter(ex, make_reproducable(ex, seed, history_dir))
-#             for ex in exercises
-#         ]
-#         for result in _run_exercises(setup_manager, wrapped_exercises, seed):
-#             yield TrainingExerciseAdapter.unwrap_result(result)
+def run_playlist(playlist: Playlist, seed: int = 4) -> Iterator[ExerciseResult]:
+    with setup_manager_context() as setup_manager:
+        wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
+        for i, rlbot_result in enumerate(_run_exercises(setup_manager, wrapped_exercises, seed)):
+            yield ExerciseResult(
+                grade=rlbot_result.grade,
+                exercise=rlbot_result.exercise.exercise,  # unwrap the TrainingExerciseAdapter.
+                reproduction_info=ReproductionInfo(
+                    seed=seed,
+                    playlist_index=i,
+                )
+            )
 
 class ReloadPolicy:
     NEVER = 1
