@@ -12,7 +12,6 @@ from rlbot.utils.structures.game_data_struct import GameTickPacket
 from rlbottraining.grading.grader import Grader
 from rlbottraining.grading.training_tick_packet import TrainingTickPacket
 from rlbottraining.history.exercise_result import ExerciseResult
-from rlbottraining.history.match_config_io import ensure_match_config_on_disk
 from rlbottraining.rng import SeededRandomNumberGenerator
 from rlbottraining.training_exercise import TrainingExercise
 

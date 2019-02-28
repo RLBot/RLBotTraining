@@ -16,7 +16,7 @@ from rlbottraining.history.exercise_result import ExerciseResult, ReproductionIn
 
 LOGGER_ID = 'training'
 
-
+# FIXME
 # def run_playlist(exercises: Playlist, history_dir: Optional[Path] = None, seed: int = 4) -> Iterator[ExerciseResult]:
 #     with setup_manager_context() as setup_manager:
 #         wrapped_exercises = [
