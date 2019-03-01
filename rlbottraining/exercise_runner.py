@@ -6,7 +6,7 @@ import time
 import traceback
 
 from rlbot.setup_manager import SetupManager, setup_manager_context
-from rlbot.training.training import run_exercises as _run_exercises, Result as _Result
+from rlbot.training.training import run_exercises as rlbot_run_exercises
 from rlbot.utils.logging_utils import get_logger
 from rlbot.utils.class_importer import load_external_module
 
@@ -19,7 +19,7 @@ LOGGER_ID = 'training'
 def run_playlist(playlist: Playlist, seed: int = 4) -> Iterator[ExerciseResult]:
     with setup_manager_context() as setup_manager:
         wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
-        for i, rlbot_result in enumerate(_run_exercises(setup_manager, wrapped_exercises, seed)):
+        for i, rlbot_result in enumerate(rlbot_run_exercises(setup_manager, wrapped_exercises, seed)):
             yield ExerciseResult(
                 grade=rlbot_result.grade,
                 exercise=rlbot_result.exercise.exercise,  # unwrap the TrainingExerciseAdapter.
@@ -57,7 +57,7 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
         for seed in infinite_seed_generator():
             playlist = playlist_factory()
             wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
-            result_iter = _run_exercises(setup_manager, wrapped_exercises, seed)
+            result_iter = rlbot_run_exercises(setup_manager, wrapped_exercises, seed)
 
             for i, rlbot_result in enumerate(result_iter):
                 result = ExerciseResult(
@@ -84,7 +84,7 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
                         continue  # keep running previous exercises until new ones are fixed.
                     playlist_factory = new_playlist_factory
                     if len(new_playlist) != len(playlist) or any(e1.name != e2.name for e1,e2 in zip(new_playlist, playlist)):
-                        log.warn(f'Need to restart to pick up new exercises.')
+                        log.warning(f'Need to restart to pick up new exercises.')
                         playlist = new_playlist
                         break  # different set of exercises. Can't monkeypatch.
                     for new_exercise, old_exercise in zip(new_playlist, playlist):

@@ -38,7 +38,7 @@ def log_result(result: ExerciseResult, log: Logger):
     if isinstance(grade, Pass):
         log.info(f'{result.exercise.name}: {grade}')
     else:
-        log.warn(f'{result.exercise.name}: {grade}')
+        log.warning(f'{result.exercise.name}: {grade}')
 
 def store_result(result: ExerciseResult, history_dir: Path):
     """

@@ -1,7 +1,7 @@
 from typing import Mapping, Any
 import json
 
-from rlbot.training.training import Pass, Fail, Result, Exercise
+from rlbot.training.training import Pass, Fail, Result
 
 from rlbottraining.history.metric import Metric
 from rlbottraining.grading.grader import Grader
@@ -20,7 +20,7 @@ class MetricJsonEncoder(json.JSONEncoder):
             return json_dict
 
         # Best-effort encoding of some well known types which could get subclassed.
-        well_known_types = [Pass, Fail, Result, Exercise, Grader]
+        well_known_types = [Pass, Fail, Result, Grader]
         for cls in well_known_types:
             if not isinstance(obj, cls):
                 continue
