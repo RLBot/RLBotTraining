@@ -119,6 +119,10 @@ class RunModuleTest(unittest.TestCase):
                 results[0]['exercise']['__class__'],
                 'rlbottraining.common_exercises.bronze_striker.FacingAwayFromBallInFrontOfGoal'
             )
+            self.assertLess(
+                results[0]['create_time_utc_seconds'],
+                results[1]['create_time_utc_seconds'],
+            )
 
             self.assertEqual(
                 log_messages,
