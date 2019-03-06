@@ -25,7 +25,7 @@ class TrainingExercise(Metric):
         This method is called after on_tick().
         It is optional to override this method.
         """
-        pass
+        self.grader.render(renderer)
 
 
 Playlist = Iterable[TrainingExercise]
