@@ -37,10 +37,16 @@ class ExerciseResult(Metric):
 
 def log_result(result: ExerciseResult, log: Logger):
     grade = result.grade
+    try:
+        grade_str = str(result.grade)
+    except Exception as e:
+        get_logger(LOGGER_ID).error(f'Could not format grade: {e}')
+        return
+
     if isinstance(grade, Pass):
-        log.info(f'{result.exercise.name}: {grade}')
+        log.info(f'{result.exercise.name}: {grade_str}')
     else:
-        log.warning(f'{result.exercise.name}: {grade}')
+        log.warning(f'{result.exercise.name}: {grade_str}')
 
 def store_result(result: ExerciseResult, history_dir: Path):
     """
