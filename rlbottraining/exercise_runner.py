@@ -84,11 +84,16 @@ def infinite_seed_generator():
         yield int(time.time() * 1000)
 
 def print_result(result: ExerciseResult):
-    grade = result.grade
-    if isinstance(grade, Pass):
-        get_logger(LOGGER_ID).info(f'{result.exercise.name}: {grade}')
+    log = get_logger(LOGGER_ID)
+    try:
+        grade_str = str(result.grade)
+    except Exception as e:
+        get_logger(LOGGER_ID).error(f'could not format grade: {e}')
+        return
+    if isinstance(result.grade, Pass):
+        get_logger(LOGGER_ID).info(f'{result.exercise.name}: {grade_str}')
     else:
-        get_logger(LOGGER_ID).warn(f'{result.exercise.name}: {grade}')
+        get_logger(LOGGER_ID).warn(f'{result.exercise.name}: {grade_str}')
 
 def load_default_playlist(python_file_with_playlist: Path) -> Callable[[], Playlist]:
     module = load_external_module(python_file_with_playlist)
