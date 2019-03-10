@@ -27,7 +27,7 @@ class BotConfigs:
 
 class HistoryPaths:
     """
-    Relative paths within the history directory which contains
+    Relative paths within the history directory (history_dir) which contains
     metrics of past training runs.
     """
 
@@ -35,8 +35,9 @@ class HistoryPaths:
     # output of training runs.
     # Files in here should be immutable with the caveat of data retention.
     authoritative_data = Path('authoritative_data')
-
     exercise_results = authoritative_data / 'exercise_results'
+
+    static_website_dir = Path('static_website')
 
 class ExerciseDataCache:
     """

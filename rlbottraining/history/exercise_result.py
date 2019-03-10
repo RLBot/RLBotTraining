@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from logging import Logger
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any
 import uuid
 import json
 
@@ -13,6 +13,7 @@ from rlbottraining.history.metric_json_encoder import MetricJsonEncoder
 from rlbottraining.paths import HistoryPaths
 from rlbottraining.training_exercise import TrainingExercise
 
+ExerciseResultJson = Dict[str, Any]
 
 @dataclass
 class ReproductionInfo(Metric):
