@@ -6,7 +6,7 @@ release_notes = {
 
     '0.2.1': '''
         - Added support for writing to history_dir - DomNomNom
-    '''
+    ''',
 
     '0.1.6': '''
         - Started releasing to pypi - DomNomNom
