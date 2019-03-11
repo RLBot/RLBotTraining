@@ -5,6 +5,7 @@ from pathlib import Path
 
 from rlbottraining.history.exercise_result import ExerciseResultJson
 from rlbottraining.history.website.view import Aggregator, Renderer
+from rlbottraining.paths import HistoryPaths
 
 @dataclass
 class FullJsonRenderer(Renderer):
@@ -21,6 +22,6 @@ class FullJsonRenderer(Renderer):
 class FullJsonAggregator(Aggregator):
 
     def add_exercise_result(self, result_json: ExerciseResultJson):
-        path = Path('result_json') / f'{result_json["run_id"]}.json'
+        path = HistoryPaths.Website.data_dir / 'result_json' / f'{result_json["run_id"]}.json'
         self.shared_url_map[path] = FullJsonRenderer(result_json=result_json)
 
