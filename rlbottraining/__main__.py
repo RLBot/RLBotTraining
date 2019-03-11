@@ -30,7 +30,7 @@ def main():
             history_dir=arguments['--history_dir']
         )
     if arguments['generate_static_website']:
-        server = Server(history_dir=arguments['<history_dir>'])
+        server = Server(history_dir=Path(arguments['<history_dir>']))
         server.generate_static_website()
 
 if __name__ == '__main__':

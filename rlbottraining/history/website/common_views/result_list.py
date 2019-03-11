@@ -5,6 +5,7 @@ from pathlib import Path
 
 from rlbottraining.history.exercise_result import ExerciseResultJson
 from rlbottraining.history.website.view import Aggregator, Renderer
+from rlbottraining.paths import HistoryPaths
 
 @dataclass
 class SlimResultsRenderer(Renderer):
@@ -63,7 +64,7 @@ slim_keys = [path.split('.') for path in [
 
 @dataclass
 class ResultListAggregator(Aggregator):
-    path: Path = field(default_factory=lambda: Path('slim_results.json'))
+    path: Path = field(default_factory=lambda: HistoryPaths.Website.data_dir/'slim_results.json')
 
     def add_exercise_result(self, result_json: ExerciseResultJson):
         if self.path in self.shared_url_map:
