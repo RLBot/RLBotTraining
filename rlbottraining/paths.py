@@ -15,7 +15,9 @@ _match_config_dir = _rlbot_training_dir / 'rlbot_configs'
 _common_exercises_dir = _rlbot_training_dir / 'common_exercises'
 _exercise_data_cache_dir = _rlbot_training_dir / 'exercise_data_cache_dir'
 _match_config_dir = _rlbot_training_dir / 'match_configs'
-_website_static_source = _rlbot_training_dir / 'history' / 'website' / 'static'
+_website_source = _rlbot_training_dir / 'history' / 'website'
+_website_dev_server = _website_source / 'dev_server.py'
+_website_static_source = _website_source / 'static'
 # You may rely on the ones below.
 
 class BotConfigs:
@@ -40,7 +42,7 @@ class HistoryPaths:
 
     class Website:
         _website_dir = Path('website')
-        data_dir = _website_dir / 'data'
+        data_dir = Path('data')
 
 class ExerciseDataCache:
     """

@@ -11,7 +11,7 @@ from rlbottraining.history.website.common_views.result_list import ResultListAgg
 from rlbottraining.history.website.view import Aggregator, Renderer
 from rlbottraining.paths import HistoryPaths, _website_static_source
 
-class Server():
+class Server:
 
     history_dir: Path
     aggregators: List[Aggregator]
@@ -19,6 +19,7 @@ class Server():
 
     def __init__(self, history_dir: Path, url_map=None, aggregators=None):
         self.history_dir = history_dir
+        self.out_dir = self.history_dir / HistoryPaths.Website._website_dir
         self.url_map = {} if url_map is None else url_map
         if aggregators is None:
             aggregators = [
@@ -40,22 +41,28 @@ class Server():
             root = Path(root)
             for file in files:
                 path = root / file
-                serve_path = HistoryPaths.Website._website_dir / path.relative_to(static_dir)
+                serve_path = path.relative_to(static_dir)
                 self.url_map[serve_path] = StaticFileRenderer(file_path=path)
 
     def add_exercise_result(self, result_json: ExerciseResultJson):
         for agg in self.aggregators:
             agg.add_exercise_result(result_json)
 
-    def generate_static_website(self):
-        out_dir = self.history_dir / HistoryPaths.Website._website_dir
-        assert isinstance(out_dir, Path), f'{repr(out_dir)} is should be a path'
-        if out_dir.exists():
-            shutil.rmtree(out_dir)
-        for path, renderer in self.url_map.items():
-            file_path = self.history_dir / path
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.write_text(renderer.render())
+    def render_static_website(self):
+        self.clean_website()
+        for path in self.url_map:
+            self.render_to_disk(path)
+
+    def clean_website(self):
+        if self.out_dir.exists():
+            shutil.rmtree(self.out_dir)
+
+    def render_to_disk(self, path):
+        renderer = self.url_map[path]
+        file_path = self.out_dir / path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(renderer.render())
+
 
 @dataclass
 class StaticFileRenderer(Renderer):
