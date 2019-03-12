@@ -61,11 +61,16 @@ class Server:
         renderer = self.url_map[path]
         file_path = self.out_dir / path
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_path.write_text(renderer.render())
+        content = renderer.render()
+        if isinstance(content, bytes):
+            file_path.write_bytes(content)
+        else:
+            file_path.write_text(content)
+
 
 
 @dataclass
 class StaticFileRenderer(Renderer):
     file_path: Path
-    def render(self) -> str:
-        return self.file_path.read_text()
+    def render(self):
+        return self.file_path.read_bytes()
