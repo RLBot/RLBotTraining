@@ -20,7 +20,7 @@ setuptools.setup(
     install_requires=[
         'rlbot>=1.13.2',
         'docopt',
-        'jinja2',
+        'watchdog',
     ],
     python_requires='>=3.7.0',
     version=version.__version__,
