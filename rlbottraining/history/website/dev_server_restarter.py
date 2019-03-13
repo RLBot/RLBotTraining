@@ -64,11 +64,11 @@ def restart_devserver_on_source_change(*args):
         nonlocal child_process
         if child_process:
             kill_proc_tree(child_process.pid)
-
         child_process = Popen(
             subprocess_command,
             shell=True,
         )
+        get_logger('restarter').info('child started')
         atexit.register(lambda: child_process.kill())  # behave like a daemon
 
     start_dev_server()

@@ -34,6 +34,7 @@ class Server:
                 self.add_exercise_result(json.load(f))
 
         self.add_static_files()
+
     # TODO: monitor authoritative_data
 
     def add_static_files(self, static_dir: Path=_website_static_source):
