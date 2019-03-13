@@ -1,16 +1,16 @@
 from subprocess import Popen, PIPE, TimeoutExpired
-from watchdog.events import LoggingEventHandler
-from watchdog.observers import Observer
 import atexit
 import datetime
 import psutil
 import sys
 import time
 
-
+from watchdog.events import LoggingEventHandler
+from watchdog.observers import Observer
 
 from rlbot.utils.logging_utils import get_logger
 from rlbottraining.paths import _website_dev_server, _website_source
+
 
 def KILL(process):
     try:
@@ -73,7 +73,6 @@ def restart_devserver_on_source_change(*args):
 
     start_dev_server()
 
-    event_handler = LoggingEventHandler()
     event_handler = CallOnModified(start_dev_server)
     observer = Observer()
     observer.schedule(event_handler, str(_website_source), recursive=True)

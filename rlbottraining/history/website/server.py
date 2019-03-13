@@ -1,6 +1,6 @@
 import os
 import json
-from typing import List, Dict
+from typing import List, Dict, Callable
 from dataclasses import dataclass, field
 import shutil
 from pathlib import Path
@@ -12,6 +12,11 @@ from rlbottraining.history.website.view import Aggregator, Renderer
 from rlbottraining.paths import HistoryPaths, _website_static_source
 
 class Server:
+
+    """
+    This class manages the state of the views (renderers, website) given the authoritative data.
+    It glues authoritative data, renderers, and the output website together.
+    """
 
     history_dir: Path
     aggregators: List[Aggregator]
@@ -34,8 +39,6 @@ class Server:
                 self.add_exercise_result(json.load(f))
 
         self.add_static_files()
-
-    # TODO: monitor authoritative_data
 
     def add_static_files(self, static_dir: Path=_website_static_source):
         for root, dirs, files in os.walk(static_dir):
@@ -67,7 +70,6 @@ class Server:
             file_path.write_bytes(content)
         else:
             file_path.write_text(content)
-
 
 
 @dataclass
