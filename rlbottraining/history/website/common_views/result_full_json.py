@@ -22,6 +22,6 @@ class FullJsonRenderer(Renderer):
 class FullJsonAggregator(Aggregator):
 
     def add_exercise_result(self, result_json: ExerciseResultJson):
-        path = HistoryPaths.Website.data_dir / 'result_json' / f'{result_json["run_id"]}.json'
+        path = HistoryPaths.Website.data_dir / 'results' / f'{result_json["run_id"]}.json'
         self.shared_url_map[path] = FullJsonRenderer(result_json=result_json)
 

@@ -1,0 +1,9 @@
+.run-id {
+    font-family: monospace;
+}
+.not-important {
+    color: #888;
+    font-size: 12px;
+}
+.grade-pass { background-color: #254925; }
+.grade-fail { background-color: #4f2222; }

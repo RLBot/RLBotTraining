@@ -29,9 +29,10 @@ from rlbottraining.version import __version__
 def run_devserver(history_dir: Path, host: str, port: int):
     logger = get_logger('dev_server')
 
-
+    logger.info('Starting server..')
     server = Server(history_dir)
     server.clean_website()
+
 
     serve_dir = history_dir / HistoryPaths.Website._website_dir
     class DevServer(SimpleHTTPRequestHandler):
@@ -39,6 +40,8 @@ def run_devserver(history_dir: Path, host: str, port: int):
             path = Path(self.translate_path(self.path)).relative_to(serve_dir)
             if path == Path('.'):
                 path = Path('index.html')
+            if path not in server.url_map:
+                self.send_error(404)
             server.render_to_disk(path)
             super().do_GET()
         def log_request(self, code='-', size=None):
@@ -58,6 +61,7 @@ def run_devserver(history_dir: Path, host: str, port: int):
 
 def main():
     arguments = docopt(__doc__, version=__version__)
+
     run_devserver(
         history_dir=Path(arguments['<history_dir>']),
         host=arguments['<host>'],

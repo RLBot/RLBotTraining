@@ -1,11 +1,139 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script type="text/javascript" src=""></script>
-    <link rel="stylesheet" type="text/css" href="/css/main.css" />
-    <title>RLBotTraining UI</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="/css/main.css" />
+  <link rel="stylesheet" type="text/css" href="/css/exercise_table.css" />
+  <title>RLBotTraining UI</title>
 </head>
 <body>
-Hi there!
+<h1>RLBotTraining Results:</h1>
+
+<div id="loading">Loading...</div>
+<table id="results-summary"></table>
+
+<script type="text/javascript" src="/thirdparty/jquery.js"></script>
+<script type="text/javascript" src="/thirdparty/datatables/js/jquery.dataTables.js"></script>
+<link rel="stylesheet" type="text/css" href="/thirdparty/datatables/css/jquery.dataTables.css" />
+<link rel="preload" crossorigin="anonymous" href="/data/slim_results.json" as="fetch">
+
+<script type="text/javascript">
+"use strict"
+
+async function main() {
+
+  // prevent XSS
+  const escapeText = $.fn.dataTable.render.text().display;
+  $.extend(true, $.fn.dataTable.defaults, {
+    column: {
+      render(data) {  return escapeText(data);  },
+    }
+  });
+
+  const rows = await getJSON('/data/slim_results.json');
+  const columns = [
+    {
+      data: 'run_id',
+      title: 'Run ID',
+      render(run_id) {
+        return `
+          <a class="run-id" href="/result.html#${encodeURIComponent(run_id)}" alt="${escapeText(run_id)}">
+            ${escapeText(run_id).substr(0, 16)}…
+          </a>
+        `;
+      }
+    },
+    {
+      data: 'create_time_utc_seconds',
+      title: 'Time',
+      render(utc_seconds) {
+        return '' + new Date(1000*utc_seconds).toISOString().replace('T', '\u2007').slice(0, 19);
+      },
+    },
+    {
+      data: 'exercise.__class__',
+      title: 'Exercise Class',
+      render(class_name) {
+        return formatClassName(escapeText(class_name));
+      },
+    },
+    { data: 'exercise.name', title: 'Exercise Name'},
+    {
+      data: 'grade',
+      title: 'Grade',
+      render(grade_obj) {
+        if (!grade_obj) {
+          return '';
+        }
+        let cls = '';
+
+        return `
+          <div class="${cls}">
+            ${formatClassName(escapeText(grade_obj['__class__']))}
+          </div>
+        `;
+      }
+    }
+];
+
+  $('#loading').hide()
+  window.dataTable = $('#results-summary').DataTable({
+      autoWidth: false,
+      paging: false,
+      order: [[ 1, "desc" ]],
+      filter: true,
+      info: false,
+      columns,
+      createdRow: function(row, data, dataIndex) {
+        $(row).addClass(getPassFailCssClass(data['grade']));
+      }
+  });
+
+  window.dataTable.clear().rows.add(rows).draw();
+}
+main();
+
+function getPassFailCssClass(grade_obj) {
+  if (grade_obj['__isinstance_Fail__']) {
+    return 'grade-fail';
+  } else if (grade_obj['__isinstance_Pass__']) {
+    return 'grade-pass';
+  }
+  return '';
+}
+
+function formatClassName(class_name) {
+  const parts = class_name.split('.');
+  if (parts.length < 2) {
+    return class_name;
+  }
+  return `
+    <span class="not-important">
+      ${parts.slice(0, parts.length-1).join('.') + '.'}` +
+    `</span>` +
+    `<span>` +  // deliberately not leaving whitespace here
+      `${parts[parts.length-1]}`+
+    `</span>`
+}
+
+function getJSON(url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'json';
+    xhr.onload = () => {
+      const status = xhr.status;
+      if (status == 200) {
+        resolve(xhr.response);
+      } else {
+        reject(status);
+      }
+    };
+    xhr.send();
+  });
+};
+
+</script>
+
 </body>
 </html>
