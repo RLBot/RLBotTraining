@@ -2,8 +2,8 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" type="text/css" href="/css/main.css" />
-  <link rel="stylesheet" type="text/css" href="/css/exercise_table.css" />
+  <link rel="stylesheet" type="text/css" href="css/main.css" />
+  <link rel="stylesheet" type="text/css" href="css/exercise_table.css" />
   <title>RLBotTraining UI</title>
 </head>
 <body>
@@ -12,10 +12,10 @@
 <div id="loading">Loading...</div>
 <table id="results-summary"></table>
 
-<script type="text/javascript" src="/thirdparty/jquery.js"></script>
-<script type="text/javascript" src="/thirdparty/datatables/js/jquery.dataTables.js"></script>
-<link rel="stylesheet" type="text/css" href="/thirdparty/datatables/css/jquery.dataTables.css" />
-<link rel="preload" crossorigin="anonymous" href="/data/slim_results.json" as="fetch">
+<script type="text/javascript" src="thirdparty/jquery.js"></script>
+<script type="text/javascript" src="thirdparty/datatables/js/jquery.dataTables.js"></script>
+<link rel="stylesheet" type="text/css" href="thirdparty/datatables/css/jquery.dataTables.css" />
+<link rel="preload" crossorigin="anonymous" href="data/slim_results.json" as="fetch">
 
 <script type="text/javascript">
 "use strict"
@@ -30,14 +30,14 @@ async function main() {
     }
   });
 
-  const rows = await getJSON('/data/slim_results.json');
+  const rows = await getJSON('data/slim_results.json');
   const columns = [
     {
       data: 'run_id',
       title: 'Run ID',
       render(run_id) {
         return `
-          <a class="run-id" href="/result.html#${encodeURIComponent(run_id)}" alt="${escapeText(run_id)}">
+          <a class="run-id" href="result.html#${encodeURIComponent(run_id)}" alt="${escapeText(run_id)}">
             ${escapeText(run_id).substr(0, 16)}…
           </a>
         `;

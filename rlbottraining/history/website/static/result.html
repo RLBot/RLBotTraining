@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" type="text/css" href="/css/main.css" />
+  <link rel="stylesheet" type="text/css" href="css/main.css" />
   <title>Exercise Run</title>
 </head>
 <body>
@@ -11,9 +11,9 @@
 
 <div id="result-json"></div>
 
-<script type="text/javascript" src="/thirdparty/jquery.js"></script>
-<script src="/thirdparty/jsonformatter/jsonFormatter.min.js"></script>
-<link rel="stylesheet" type="text/css" href="/thirdparty/jsonFormatter/jsonFormatter.min.css">
+<script type="text/javascript" src="thirdparty/jquery.js"></script>
+<script src="thirdparty/jsonformatter/jsonFormatter.min.js"></script>
+<link rel="stylesheet" type="text/css" href="thirdparty/jsonFormatter/jsonFormatter.min.css">
 <script type="text/javascript">
 async function main() {
   const hash = document.location.hash.slice(1);
@@ -21,7 +21,7 @@ async function main() {
     $('body').text('You did not specify which result you want to view.');
     return;
   }
-  const json_source = '/data/results/' + hash + '.json';
+  const json_source = 'data/results/' + hash + '.json';
   $('#raw-json-link').attr('href', json_source).text('Click here for raw JSON.');
 
   console.log('getting json: ', json_source)

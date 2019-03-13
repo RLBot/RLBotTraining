@@ -21,18 +21,22 @@ from functools import partial
 from docopt import docopt
 
 from rlbot.utils.logging_utils import get_logger
-from rlbottraining.paths import HistoryPaths
+from rlbottraining.history.website.authoritative_data_monitor import monitor_authoritative_data
 from rlbottraining.history.website.server import Server
+from rlbottraining.paths import HistoryPaths
 from rlbottraining.version import __version__
 
 
 def run_devserver(history_dir: Path, host: str, port: int):
     logger = get_logger('dev_server')
 
-    logger.info('Starting server..')
-    server = Server(history_dir)
-    server.clean_website()
-
+    server = None
+    def reset_server():
+        nonlocal server
+        logger.info('Starting server...')
+        server = Server(history_dir)
+        server.clean_website()
+    reset_server()
 
     serve_dir = history_dir / HistoryPaths.Website._website_dir
     class DevServer(SimpleHTTPRequestHandler):
@@ -49,15 +53,17 @@ def run_devserver(history_dir: Path, host: str, port: int):
 
     handler_class = partial(DevServer, directory=str(serve_dir))
 
-    with ThreadingHTTPServer((host, port), handler_class) as httpd:
-        sa = httpd.socket.getsockname()
-        serve_message = "Serving HTTP on {host} port {port} (http://{host}:{port}/) ..."
-        logger.info(serve_message.format(host=sa[0], port=sa[1]))
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            server.clean_website()  # Don't use the partially rendered site for anything.
-            return
+    with monitor_authoritative_data(history_dir, server.add_exercise_result, reset_server):
+        with ThreadingHTTPServer((host, port), handler_class) as httpd:
+            sa = httpd.socket.getsockname()
+            host, port = sa[0], sa[1]
+            logger.info(f'Serving HTTP on {host} port {port} (http://{host}:{port}/) ...')
+            try:
+                httpd.serve_forever()
+            except KeyboardInterrupt:
+                pass
+    server.clean_website()  # Don't use the partially rendered site for anything.
+
 
 def main():
     arguments = docopt(__doc__, version=__version__)
