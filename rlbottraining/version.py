@@ -6,7 +6,7 @@ release_notes = {
     '0.3.0': '''
         - Added a website to summarize past runs - DomNomNom
         - Made this website pick up live changes (code and results) - DomNomNom
-    '''
+    ''',
 
     '0.2.1': '''
         - Added support for writing to history_dir - DomNomNom
