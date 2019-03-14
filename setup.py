@@ -45,6 +45,7 @@ setuptools.setup(
         'rlbottraining': [
             f'{paths._match_config_dir}/*.cfg',
             f'{paths._example_bot_dir}/*/*.cfg',
+            paths._website_static_source,
         ]
     },
 )
