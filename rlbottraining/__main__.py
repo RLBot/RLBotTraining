@@ -4,8 +4,8 @@ The playlist has to be provided via a make_default_playlist() function.
 
 Usage:
   rlbottraining run_module <python_file> [--history_dir=<path>]
-  rlbottraining render_static_website <history_dir>
-  rlbottraining dev_server <history_dir> [--host=<host>] [--port=<port>]
+  rlbottraining history_dev_server <history_dir> [--host=<host>] [--port=<port>]
+  rlbottraining history_render_static <history_dir>
   rlbottraining (-h | --help)
   rlbottraining --version
 
@@ -33,10 +33,10 @@ def main():
             Path(arguments['<python_file>']),
             history_dir=arguments['--history_dir']
         )
-    if arguments['render_static_website']:
+    if arguments['history_render_static']:
         server = Server(history_dir=Path(arguments['<history_dir>']))
         server.render_static_website()
-    elif arguments['dev_server']:
+    elif arguments['history_dev_server']:
         restart_devserver_on_source_change(
             arguments['<history_dir>'],
             arguments['--host'],
