@@ -12,7 +12,7 @@ Usage:
 Options:
   -H --history_dir=<path>  Where to persist results of the exercises.
   --host=<host>            [default: localhost].
-  --port=<port>            [default: 8000]
+  --port=<port>            [default: 8878]
   -h --help                Show this screen.
   --version                Show version.
 """
