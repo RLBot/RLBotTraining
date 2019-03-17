@@ -15,6 +15,14 @@
 <script src="thirdparty/jsonformatter/jsonFormatter.min.js"></script>
 <link rel="stylesheet" type="text/css" href="thirdparty/jsonFormatter/jsonFormatter.min.css">
 <script type="text/javascript">
+
+const default_hidden_keys = [
+  'match_config',
+  'dropshot_tiles',
+  'game_boosts',
+  'game_cars',
+];
+
 async function main() {
   const hash = document.location.hash.slice(1);
   if (hash.length == 0) {
@@ -28,7 +36,10 @@ async function main() {
   const json = await getFile(json_source);
   $('#result-json').text(json).jsonFormatter({quoteKeys: false});
   // Minimize the match_config by default as it takes up a lot of space
-  $(".jsonFormatter-propertyName:contains('match_config')").next().next().click();
+
+  for (const key of default_hidden_keys) {
+    $(`.jsonFormatter-propertyName:contains('${key}')`).next().next().click();
+  }
 }
 main();
 
