@@ -1,3 +1,4 @@
+import ctypes
 from typing import Mapping, Any
 import json
 
@@ -29,6 +30,11 @@ class MetricJsonEncoder(json.JSONEncoder):
             json_dict[f'__isinstance_{cls.__name__}__'] = True
             return json_dict
 
+        if isinstance(obj, ctypes.Structure):
+            json_dict = json.loads(CtypesEncoder().encode(obj))
+            json_dict['__class__'] = full_class_name_of(obj)
+            return json_dict
+
         # Numpy array. Not using isinstance to keep dependencies lean.
         if 'ndarray' in obj.__class__.__name__:
             return obj.tolist()
@@ -52,7 +58,7 @@ def full_class_name_of(obj) -> str:
     return full_class_name(obj.__class__)
 def full_class_name(cls: type) -> str:
     # https://stackoverflow.com/a/2020083
-    assert type(cls) is type, 'Did you mean to use full_class_name_of() instead?'
+    assert isinstance(type(cls), type), f'Did you mean to use full_class_name_of() instead? type() returned {type(cls)}'
     module = cls.__module__
     if module is None or module == str.__class__.__module__:
         return cls.__name__  # Avoid reporting __builtin__
@@ -70,3 +76,41 @@ def make_encode_error(e: Exception):
     return {
         '__encode_error__': jsonify_exception(e)
     }
+
+
+class CtypesEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (ctypes.Array, list)):
+            return [self.default(e) for e in obj]
+
+        if isinstance(obj, ctypes._Pointer):
+            return self.default(obj.contents) if obj else None
+
+        if isinstance(obj, ctypes._SimpleCData):
+            return self.default(obj.value)
+
+        if isinstance(obj, (bool, int, float, str)):
+            return obj
+
+        if obj is None:
+            return obj
+
+        if isinstance(obj, (ctypes.Structure, ctypes.Union)):
+            result = {}
+            anonymous = getattr(obj, '_anonymous_', [])
+
+            for key, *_ in getattr(obj, '_fields_', []):
+                value = getattr(obj, key)
+
+                # private fields don't encode
+                if key.startswith('_'):
+                    continue
+
+                if key in anonymous:
+                    result.update(self.default(value))
+                else:
+                    result[key] = self.default(value)
+
+            return result
+
+        return json.JSONEncoder.default(self, obj)

@@ -3,6 +3,7 @@ import json
 from dataclasses import dataclass, field
 
 from rlbot.training.training import Pass, Fail, FailDueToExerciseException, Result
+from rlbot.utils.structures.game_data_struct import GameTickPacket
 
 from rlbottraining.grading.grader import Grader
 from rlbottraining.history.metric import Metric
@@ -101,6 +102,12 @@ class MetricsTest(unittest.TestCase):
         self.assertEqual(
             encode(MyPassPort(passport_number=NonJsonEncodable())),
             '{"__class__": "tests.test_metrics.MyPassPort", "__isinstance_Pass__": true, "passport_number": {"__encode_error__": {"__class__": "TypeError", "__isinstance_Exception__": true, "message": "Object of type NonJsonEncodable is not JSON serializable"}}}'
+        )
+
+    def test_encode_game_tick_packet(self):
+        self.assertEqual(
+            encode(GameTickPacket())[:71],
+            '{"__class__": "rlbot.utils.structures.game_data_struct.GameTickPacket",'
         )
 
     # def test_encode_result(self):
