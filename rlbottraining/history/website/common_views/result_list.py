@@ -53,7 +53,7 @@ def slim_copy(in_json: ExerciseResultJson, key_paths: List[List[str]]) -> Exerci
 slim_keys = [path.split('.') for path in [
     '__class__',
     'run_id',
-    'create_time_utc_seconds',
+    'create_time',
     'exercise.name',
     'exercise.__class__',
     'exercise.grader.__class__',

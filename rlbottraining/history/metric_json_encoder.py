@@ -1,6 +1,7 @@
 import ctypes
 from typing import Mapping, Any
 import json
+from datetime import datetime
 
 from rlbot.training.training import Pass, Fail, Result
 
@@ -35,6 +36,12 @@ class MetricJsonEncoder(json.JSONEncoder):
             json_dict['__class__'] = full_class_name_of(obj)
             return json_dict
 
+        if isinstance(obj, datetime):
+            return {
+                '__class__': 'datetime.datetime',
+                'iso8601': iso_format(obj),
+            }
+
         # Numpy array. Not using isinstance to keep dependencies lean.
         if 'ndarray' in obj.__class__.__name__:
             return obj.tolist()
@@ -64,6 +71,13 @@ def full_class_name(cls: type) -> str:
         return cls.__name__  # Avoid reporting __builtin__
     return module + '.' + cls.__name__
 
+def iso_format(dt: datetime) -> str:
+    try:
+        utc = dt + dt.utcoffset()
+    except TypeError as e:
+        utc = dt
+    isostring = datetime.strftime(utc, '%Y-%m-%dT%H:%M:%S.{0}Z')
+    return isostring.format(int(round(utc.microsecond/1000.0)))
 
 def jsonify_exception(e: Exception):
     return {
