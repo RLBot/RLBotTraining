@@ -33,7 +33,7 @@ class ExerciseResult(Metric):
     exercise: TrainingExercise
     reproduction_info: ReproductionInfo
     run_id: str = field(default_factory=lambda: uuid.uuid4().hex)
-    create_time_utc_seconds: str = field(default_factory=lambda: datetime.utcnow().timestamp())
+    create_time: datetime = field(default_factory=lambda: datetime.utcnow())
 
 
 def log_result(result: ExerciseResult, log: Logger):

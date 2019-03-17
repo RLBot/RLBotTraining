@@ -39,7 +39,7 @@ class HistoryPaths:
     # Files in here should be immutable with the caveat of data retention.
     authoritative_data = Path('authoritative_data')
     exercise_results = authoritative_data / 'exercise_results'
-    additional_website_code = authoritative_data / 'additional_website_code'  # holds python files or symlinks to python files with contain Aggregators.
+    additional_website_code = authoritative_data / 'additional_website_code.manual_symlink'  # points to python files or symlinks to python files with contain Aggregators.
 
     class Website:
         _website_dir = Path('website')

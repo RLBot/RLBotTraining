@@ -44,10 +44,10 @@ async function main() {
       }
     },
     {
-      data: 'create_time_utc_seconds',
+      data: 'create_time.iso8601',
       title: 'Time',
-      render(utc_seconds) {
-        return '' + new Date(1000*utc_seconds).toISOString().replace('T', '\u2007').slice(0, 19);
+      render(time_str) {
+        return formatDate(new Date(time_str));
       },
     },
     {
@@ -74,7 +74,7 @@ async function main() {
         `;
       }
     }
-];
+  ];
 
   $('#loading').hide()
   window.dataTable = $('#results-summary').DataTable({
@@ -92,6 +92,11 @@ async function main() {
   window.dataTable.clear().rows.add(rows).draw();
 }
 main();
+
+function formatDate(d) {
+  return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2) +
+      "\u2007" + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2);
+}
 
 function getPassFailCssClass(grade_obj) {
   if (grade_obj['__isinstance_Fail__']) {
