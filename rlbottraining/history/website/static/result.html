@@ -40,6 +40,12 @@ async function main() {
   for (const key of default_hidden_keys) {
     $(`.jsonFormatter-propertyName:contains('${key}')`).next().next().click();
   }
+  for (const el of $(`.jsonFormatter-propertyName:contains('__class__')`)) {
+    el.nextSibling.nextSibling.classList.value = 'jsonFormatter-className'
+  }
+  for (const el of $(`.jsonFormatter-propertyName:contains('__')`)) {
+    el.classList.value = 'jsonFormatter-keyword'
+  }
 }
 main();
 
