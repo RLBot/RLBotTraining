@@ -11,6 +11,7 @@ from rlbot.utils.class_importer import load_external_module
 from rlbottraining.history.exercise_result import ExerciseResultJson
 from rlbottraining.history.website.common_views.result_full_json import FullJsonAggregator
 from rlbottraining.history.website.common_views.result_list import ResultListAggregator
+from rlbottraining.history.website.common_views.site_map import SiteMapAggregator
 from rlbottraining.history.website.view import Aggregator, Renderer
 from rlbottraining.paths import HistoryPaths, _website_static_source
 
@@ -34,6 +35,7 @@ class Server:
 
         if aggregators is None:
             aggregators = [
+                SiteMapAggregator(shared_url_map=self.url_map), # index.html
                 FullJsonAggregator(shared_url_map=self.url_map),
                 ResultListAggregator(shared_url_map=self.url_map),
                 make_static_file_aggregator(_website_static_source)(shared_url_map=self.url_map),
