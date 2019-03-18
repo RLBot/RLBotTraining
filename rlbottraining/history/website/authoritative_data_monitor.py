@@ -20,7 +20,7 @@ def monitor_authoritative_data(history_dir: Path, incremental_callback: Callable
     """
     event_handler = AuthoritativeDataMonitor(incremental_callback, reset_callback)
     observer = Observer()
-    logger.info('monitoring: ' + str(history_dir / HistoryPaths.authoritative_data))
+    logger.debug('monitoring: ' + str(history_dir / HistoryPaths.authoritative_data))
     observer.schedule(event_handler, str(history_dir / HistoryPaths.authoritative_data), recursive=True)
     observer.start()
     yield

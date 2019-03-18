@@ -17,18 +17,11 @@
 <link rel="stylesheet" type="text/css" href="thirdparty/datatables/css/jquery.dataTables.css" />
 <link rel="preload" crossorigin="anonymous" href="data/slim_results.json" as="fetch">
 
-<script type="text/javascript">
-"use strict"
+<script type="module">
+
+import {formatDate, formatClassName, escapeText} from './result_utils.js'
 
 async function main() {
-
-  // prevent XSS
-  const escapeText = $.fn.dataTable.render.text().display;
-  $.extend(true, $.fn.dataTable.defaults, {
-    column: {
-      render(data) {  return escapeText(data);  },
-    }
-  });
 
   const rows = await getJSON('data/slim_results.json');
   const columns = [
@@ -37,8 +30,8 @@ async function main() {
       title: 'Run ID',
       render(run_id) {
         return `
-          <a class="run-id" href="result.html#${encodeURIComponent(run_id)}" alt="${escapeText(run_id)}">
-            ${escapeText(run_id).substr(0, 16)}…
+          <a class="hex" href="result.html#${encodeURIComponent(run_id)}" alt="${escapeText(run_id)}">
+            ${escapeText(run_id)}
           </a>
         `;
       }
@@ -93,10 +86,6 @@ async function main() {
 }
 main();
 
-function formatDate(d) {
-  return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2) +
-      "\u2007" + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2);
-}
 
 function getPassFailCssClass(grade_obj) {
   if (grade_obj['__isinstance_Fail__']) {
@@ -105,20 +94,6 @@ function getPassFailCssClass(grade_obj) {
     return 'grade-pass';
   }
   return '';
-}
-
-function formatClassName(class_name) {
-  const parts = class_name.split('.');
-  if (parts.length < 2) {
-    return class_name;
-  }
-  return `
-    <span class="not-important">
-      ${parts.slice(0, parts.length-1).join('.') + '.'}` +
-    `</span>` +
-    `<span>` +  // deliberately not leaving whitespace here
-      `${parts[parts.length-1]}`+
-    `</span>`
 }
 
 function getJSON(url) {
