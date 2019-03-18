@@ -9,7 +9,9 @@ from watchdog.events import LoggingEventHandler
 from watchdog.observers import Observer
 
 from rlbot.utils.logging_utils import get_logger
+
 from rlbottraining.paths import _website_dev_server, _website_source
+from rlbottraining.paths import HistoryPaths
 
 
 def KILL(process):
@@ -34,8 +36,7 @@ class CallOnModified(LoggingEventHandler):
         self.last_modified = datetime.datetime.now()
         self.callback = callback
     def on_modified(self, event):
-        if event.src_path.startswith('.\\.git'):  return
-        if event.src_path.startswith('.\\__pycache__'):  return
+        if '__pycache__' in event.src_path:  return
         # Rate limit
         now = datetime.datetime.now()
         if now - self.last_modified < datetime.timedelta(seconds=0.5):
@@ -55,9 +56,8 @@ class CallOnModified(LoggingEventHandler):
     def on_moved(self, event):
         pass
 
-def restart_devserver_on_source_change(*args):
-    args = ' '.join(str(arg) for arg in args)
-    subprocess_command = f'python {_website_dev_server} {args}'
+def restart_devserver_on_source_change(history_dir, host, port):
+    subprocess_command = f'python {_website_dev_server} {history_dir} {host} {port}'
 
     child_process = None
     def start_dev_server():
@@ -76,6 +76,14 @@ def restart_devserver_on_source_change(*args):
     event_handler = CallOnModified(start_dev_server)
     observer = Observer()
     observer.schedule(event_handler, str(_website_source), recursive=True)
+
+    # Also monitor the additional_aggregators_dir.
+    symlink_file = history_dir / HistoryPaths.additional_website_code
+    if symlink_file.exists():
+        additional_aggregators_dir = symlink_file.read_text()
+        observer.schedule(event_handler, additional_aggregators_dir, recursive=True)
+
+
     observer.start()
     try:
         while True:

@@ -53,10 +53,15 @@ class Server:
                 aggregators.append(agg_class(shared_url_map=self.url_map))
         self.aggregators = aggregators
 
+        # Add past exercise results.
         input_dir = self.history_dir / HistoryPaths.exercise_results
+        results = []
         for result_json_file in input_dir.iterdir():
             with open(result_json_file) as f:
-                self.add_exercise_result(json.load(f))
+                results.append(json.load(f))
+        results.sort(key=lambda result_json: result_json['create_time']['iso8601'])
+        for result in results:
+            self.add_exercise_result(result)
 
 
     def add_exercise_result(self, result_json: ExerciseResultJson):

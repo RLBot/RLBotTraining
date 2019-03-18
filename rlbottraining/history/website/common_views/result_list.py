@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from rlbottraining.history.exercise_result import ExerciseResultJson
+from rlbottraining.history.website.json_utils import slim_copy
 from rlbottraining.history.website.view import Aggregator, Renderer
 from rlbottraining.paths import HistoryPaths
 
@@ -18,37 +19,6 @@ class SlimResultsRenderer(Renderer):
     def render(self) -> str:
         return json.dumps(self.slim_results)
 
-def get_nested(obj: ExerciseResultJson, key_path: List[str]):
-    try:
-        for key in key_path:
-            obj = obj[key]
-    except KeyError:
-        return None
-    return obj
-def set_nested(out_json, key_path: List[str], value):
-    key, *remaining_key_path = key_path
-    if len(remaining_key_path) == 0:
-        out_json[key] = value
-        return
-    if key in out_json:
-        subobject = out_json[key]
-        assert isinstance(subobject, dict)
-    else:
-        subobject = {}
-        out_json[key] = subobject
-    set_nested(subobject, remaining_key_path, value)
-def slim_copy(in_json: ExerciseResultJson, key_paths: List[List[str]]) -> ExerciseResultJson:
-    """
-    Returns a copy of @in_json where only paths
-    specified by @keys_paths are copied.
-    """
-    out_json = {}
-    for key_path in key_paths:
-        value = get_nested(in_json, key_path)
-        if value is None:
-            continue
-        set_nested(out_json, key_path, value)
-    return out_json
 
 slim_keys = [path.split('.') for path in [
     '__class__',
