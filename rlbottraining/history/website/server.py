@@ -117,8 +117,7 @@ def set_additional_website_code(additional_website_code: Path, history_dir: Path
     """
     # Path.symlink_to() seems to raise an "OSError: symbolic link privilege not held".
     symlink_file = history_dir / HistoryPaths.additional_website_code
-    if symlink_file.exists():
-        symlink_file.remove()
+    symlink_file.parent.mkdir(parents=True, exist_ok=True)
     with open(symlink_file, 'w') as f:
         f.write(str(additional_website_code))
 
