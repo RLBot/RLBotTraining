@@ -41,7 +41,7 @@ def log_result(result: ExerciseResult, log: Logger):
     try:
         grade_str = str(result.grade)
     except Exception as e:
-        get_logger(LOGGER_ID).error(f'Could not format grade: {e}')
+        log.error(f'Could not format grade: {e}')
         return
 
     if isinstance(grade, Pass):
