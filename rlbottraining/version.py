@@ -1,11 +1,12 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 release_notes = {
-    '0.3.0': '''
+    '0.3.1': '''
         - Added a website to summarize past runs - DomNomNom
         - Made this website pick up live changes (code and results) - DomNomNom
+        - Added a syntax highlighting json viewer to view details of results - DomNomNom
     ''',
 
     '0.2.1': '''
