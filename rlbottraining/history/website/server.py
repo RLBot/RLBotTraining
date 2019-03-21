@@ -42,7 +42,7 @@ class Server:
             ]
         symlink_file = history_dir / HistoryPaths.additional_website_code
         if symlink_file.exists():
-            additional_aggregators_dir = Path(symlink_file.read_text())
+            additional_aggregators_dir = Path(symlink_file.read_text().strip())
             for file in additional_aggregators_dir.iterdir():
                 if not file.is_file:
                     continue  # ignore directories
