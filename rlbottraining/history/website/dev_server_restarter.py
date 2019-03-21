@@ -80,7 +80,7 @@ def restart_devserver_on_source_change(history_dir, host, port):
     # Also monitor the additional_aggregators_dir.
     symlink_file = history_dir / HistoryPaths.additional_website_code
     if symlink_file.exists():
-        additional_aggregators_dir = symlink_file.read_text()
+        additional_aggregators_dir = symlink_file.read_text().strip()
         observer.schedule(event_handler, additional_aggregators_dir, recursive=True)
 
 
