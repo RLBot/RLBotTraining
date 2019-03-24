@@ -49,7 +49,7 @@ class PassOnGoalForAllyTeam(Grader):
     """
 
     ally_team: int  # The team ID, as in game_datastruct.PlayerInfo.team
-    init_score: Optional[Mapping[int, int]] = None
+    init_score: Optional[Mapping[int, int]] = None  # team_id -> score
 
     def on_tick(self, tick: TrainingTickPacket) -> Optional[Union[Pass, WrongGoalFail]]:
         score = {

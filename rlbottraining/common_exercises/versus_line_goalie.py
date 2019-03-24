@@ -1,25 +1,47 @@
-from dataclasses import dataclass
+from pathlib import Path
+from dataclasses import dataclass, field
 from math import pi
 
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
+from rlbot.matchconfig.match_config import MatchConfig, PlayerConfig, Team
 
-from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
+from rlbottraining.common_graders.goal_grader import StrikerGrader
 from rlbottraining.rng import SeededRandomNumberGenerator
 from rlbottraining.training_exercise import Playlist
+from rlbottraining.match_configs import make_empty_match_config
+from rlbottraining.paths import BotConfigs
+from rlbottraining.training_exercise import TrainingExercise
+
+
+striker_team = Team.ORANGE.value
 
 @dataclass
-class VersusLineGoalie(StrikerExercise):
+class VersusLineGoalie(TrainingExercise):
+
+    match_config: MatchConfig = field(default_factory=lambda:
+        versus_line_goalie_match_config(attacker=BotConfigs.simple_bot))
+
+    grader: StrikerGrader = field(default_factory=lambda: StrikerGrader(timeout_seconds=7, ally_team=striker_team))
 
     def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
-        vel_mul = rng.uniform(1.0, 2.1)
         return GameState(
             ball=BallState(physics=Physics(
                 location=Vector3(0, -1500, 100),
-                velocity=Vector3(vel_mul * 480 * rng.uniform(-1, 1), vel_mul * -2000, 0),
+                velocity=Vector3(rng.uniform(-1, 1), 10, 0),
                 angular_velocity=Vector3(0, 0, 0))),
             cars={
-                # Goalie
+                # Striker
                 0: CarState(
+                    physics=Physics(
+                        location=Vector3(300*rng.n11(), 200*rng.n11(), 15),
+                        rotation=Rotator(0, -pi / 2, 0),
+                        velocity=Vector3(0, 0, 0),
+                        angular_velocity=Vector3(0, 0, 0)),
+                    jumped=False,
+                    double_jumped=False,
+                    boost_amount=100),
+                # Goalie
+                1: CarState(
                     physics=Physics(
                         location=Vector3(0, -5000, 15),
                         rotation=Rotator(0, rng.uniform(-.1, .1), 0),
@@ -28,21 +50,57 @@ class VersusLineGoalie(StrikerExercise):
                     jumped=True,
                     double_jumped=True,
                     boost_amount=100),
+            },
+            boosts={i: BoostState(0) for i in range(34)},
+        )
+
+@dataclass
+class SecondShot(VersusLineGoalie):
+
+    def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
+        vel_mul = rng.uniform(1.5, 2.0)
+        return GameState(
+            ball=BallState(physics=Physics(
+                location=Vector3(0, -1500, 100),
+                velocity=Vector3(vel_mul * 350 * rng.uniform(-1, 1), vel_mul * -2000, 0),
+                angular_velocity=Vector3(0, 0, 0))),
+            cars={
                 # Striker
-                1: CarState(
+                0: CarState(
                     physics=Physics(
                         location=Vector3(0, 0, 15),
-                        rotation=Rotator(0, pi / 2, 0),
+                        rotation=Rotator(0, -pi / 2, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
                     jumped=False,
                     double_jumped=False,
                     boost_amount=100),
+                # Goalie
+                1: CarState(
+                    physics=Physics(
+                        location=Vector3(0, -5000, 15),
+                        rotation=Rotator(0, rng.uniform(-.1, .1), 0),
+                        velocity=Vector3(0, 0, 0),
+                        angular_velocity=Vector3(0, 0, 0)),
+                    jumped=True,
+                    double_jumped=True,
+                    boost_amount=100),
             },
             boosts={i: BoostState(0) for i in range(34)},
         )
 
+
+
+def versus_line_goalie_match_config(attacker: Path, goalie: Path = BotConfigs.line_goalie) -> MatchConfig:
+    match_config = make_empty_match_config()
+    match_config.player_configs = [
+        PlayerConfig.bot_config(attacker, Team.ORANGE),
+        PlayerConfig.bot_config(goalie, Team.BLUE),
+    ]
+    return match_config
+
 def make_default_playlist() -> Playlist:
     return [
         VersusLineGoalie('VersusLineGoalie'),
+        SecondShot('SecondShot'),
     ]

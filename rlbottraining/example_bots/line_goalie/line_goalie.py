@@ -11,6 +11,8 @@ from rlbot.utils.structures.game_data_struct import GameTickPacket, Vector3
 
 from math import tau, sin, cos, tan, copysign, sqrt
 
+
+
 def zero_centered_angle(theta:float) -> float:
     while theta > tau/2:
         theta -= tau
@@ -85,14 +87,20 @@ class LineGoalie(BaseAgent):
 
     JUMP_BEFORE_INTERCEPT_SECONDS = .55
     DODGE_BEFORE_INTERCEPT_SECONDS = .45
-
     HEIGHT_BEFORE_DODGING = 50
+
+
+    HIGH_JUMP_BEFORE_INTERCEPT_SECONDS = 0.99
 
 
     class State(Enum):
         GROUND = 1
         JUMPING = 2
         DODGING = 3
+        BALL_GOING_AWAY = 4
+        HIGH_JUMP = 5
+        HIGH_JUMP_GROUND = 6
+    assert len(State) == len(State.__members__)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -130,24 +138,36 @@ class LineGoalie(BaseAgent):
             else:
                 # Do not search further: we do not care about backboard bounces which might come closer.
                 break
+        is_travelling_towards_line = ball_intercept.physics.velocity.y * to_ball_y < 0
         ball_intercept.physics.location.y = intercept_y
 
         seconds_until_intercept = ball_intercept.game_seconds - game_tick_packet.game_info.seconds_elapsed
         seconds_until_jump = seconds_until_intercept - self.JUMP_BEFORE_INTERCEPT_SECONDS
         seconds_until_doge = seconds_until_intercept - self.DODGE_BEFORE_INTERCEPT_SECONDS
 
-
         state = self.State.GROUND
         if car_obj.has_wheel_contact:
-            if seconds_until_intercept < self.JUMP_BEFORE_INTERCEPT_SECONDS:
-                state = self.State.JUMPING
+            if is_travelling_towards_line:
+                if ball_intercept.physics.location.z > 300:
+                    if seconds_until_intercept < self.HIGH_JUMP_BEFORE_INTERCEPT_SECONDS:
+                        state = self.State.HIGH_JUMP
+                    else:
+                        state = self.State.HIGH_JUMP_GROUND
+                else:
+                    if seconds_until_intercept < self.JUMP_BEFORE_INTERCEPT_SECONDS:
+                        state = self.State.JUMPING
+                    else:
+                        state = self.State.GROUND
             else:
-                state = self.State.GROUND
+                state = self.State.BALL_GOING_AWAY
         else:
-            if car.location.z <= self.HEIGHT_BEFORE_DODGING:
-                state = self.State.JUMPING
+            if ball_intercept.physics.location.z > 300:
+                state = self.State.HIGH_JUMP
             else:
-                state = self.State.DODGING
+                if car.location.z <= self.HEIGHT_BEFORE_DODGING:
+                    state = self.State.JUMPING
+                else:
+                    state = self.State.DODGING
 
         assert state
 
@@ -157,22 +177,17 @@ class LineGoalie(BaseAgent):
         self.state_history.append(state)
         state = self.state_history_counter.most_common(1)[0][0]
 
-        self.render(ball_intercept, seconds_until_intercept, state)
-
         if state != self.State.DODGING:
             self.ticks_in_dodge_state = 0
-
         controller_state = SimpleControllerState()
-        forward_adjust = (
-            # PD-controller
-            1.0 * (ball_intercept.physics.location.x - car.location.x) +
-            0.3 * (0 - car.velocity.x)
-        )
-        if state == self.State.GROUND:
-            # Drive to ball_intercept.physics.location.x
-            controller_state.throttle = forward_adjust
-            controller_state.boost = controller_state.throttle > 200.
 
+        def forward_adjust(desired_x):
+            return (
+                # PD-controller
+                1.0 * (desired_x - car.location.x) +
+                0.3 * (0 - car.velocity.x)
+            )
+        def steer_to_stay_on_line():
             # Try to stay aligned with the x axis.
             car_yaw = zero_centered_angle(car.rotation.yaw)
             car_yaw_vel = car.angular_velocity.z
@@ -183,6 +198,12 @@ class LineGoalie(BaseAgent):
             )
             if controller_state.throttle < 1:
                 controller_state.steer *= -1
+
+        if state == self.State.GROUND:
+            # Drive to ball_intercept.physics.location.x
+            controller_state.throttle = forward_adjust(ball_intercept.physics.location.x)
+            controller_state.boost = controller_state.throttle > 200.
+
         elif state == self.State.JUMPING:
             controller_state.jump = True
         elif state == self.State.DODGING:
@@ -191,7 +212,7 @@ class LineGoalie(BaseAgent):
                 controller_state.jump = False
             elif self.ticks_in_dodge_state == 3:
                 controller_state.roll = 1
-                controller_state.pitch = -0.008*forward_adjust
+                controller_state.pitch = -0.008*forward_adjust(ball_intercept.physics.location.x)
                 normalize = 1/sqrt(controller_state.roll**2 + controller_state.pitch**2)
                 controller_state.roll *= normalize
                 controller_state.pitch *= normalize
@@ -201,10 +222,29 @@ class LineGoalie(BaseAgent):
                 controller_state.jump = True
             else:
                 controller_state.jump = False
+        elif state == self.State.BALL_GOING_AWAY:
+            # assigning to ball_intercept for rendering.
+            ball_intercept.physics.location.x = 0.4 * game_tick_packet.game_ball.physics.location.x
+            ball_intercept.physics.location.z = 100
+            controller_state.throttle = forward_adjust(ball_intercept.physics.location.x)
+            steer_to_stay_on_line()
+            seconds_until_intercept = 2.
+        elif state == self.State.HIGH_JUMP:
+            # if car_obj.has_wheel_contact:
+            #     controller_state
+            z = car_obj.physics.location.z
+            controller_state.jump = not (110 < z < 120)
+        elif state == self.State.HIGH_JUMP_GROUND:
+            desired_vel_x = (ball_intercept.physics.location.x - car_obj.physics.location.x) / seconds_until_intercept
+            desired_vel_x *= 1.1
+            controller_state.throttle = (desired_vel_x - car_obj.physics.velocity.x)
         else:
             self.logger.warn(f'invalid state {state}')
         controller_state.throttle = clamp(controller_state.throttle, -1, 1)
         controller_state.steer = clamp(controller_state.steer, -1, 1)
+
+        self.render(ball_intercept, seconds_until_intercept, state)
+
         return controller_state
 
     def render(self, ball_intercept: BallPredictionSlice, seconds_until_intercept: float, state):
@@ -245,6 +285,7 @@ class LineGoalie(BaseAgent):
         if state == self.State.GROUND: color_func = self.renderer.grey
         elif state == self.State.JUMPING: color_func = self.renderer.red
         elif state == self.State.DODGING: color_func = self.renderer.white
+        elif state == self.State.BALL_GOING_AWAY: color_func = self.renderer.green
         else: color_func = self.renderer.orange
         self.renderer.draw_rect_3d(location, 10, 10, True, color_func(), True)
         self.renderer.end_rendering()
