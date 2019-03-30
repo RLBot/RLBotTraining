@@ -128,7 +128,7 @@ class LineGoalie(BaseAgent):
         prediction_struct = self.get_ball_prediction_struct()
         ball_intercept = prediction_struct.slices[0]
         for i, next_intercept in zip(range(prediction_struct.num_slices), prediction_struct.slices):
-            if i == 0:
+            if i == 0 or i == 1:
                 continue
             if (
                 abs(next_intercept.physics.location.y - intercept_y) <
