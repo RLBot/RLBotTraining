@@ -179,6 +179,8 @@ class LineGoalie(BaseAgent):
 
         assert state
 
+        self.render_horizontal_line(car.location.y, self.MIN_HIGH_JUMP_Z)
+
         # De-noise state
         self.state_history_counter[self.state_history.popleft()] -= 1
         self.state_history_counter[state] += 1
@@ -240,24 +242,24 @@ class LineGoalie(BaseAgent):
         elif state == self.State.HIGH_JUMP:
             # if car_obj.has_wheel_contact:
             #     controller_state
-            z = car_obj.physics.location.z
+            z = car.location.z
             controller_state.jump = not (110 < z < 120)
             if car_obj.double_jumped:
-                controller_state.pitch = min(1, max(-1, 5*(.8-car_obj.physics.rotation.pitch)))
+                controller_state.pitch = min(1, max(-1, 5*(.8-car.rotation.pitch)))
         elif state == self.State.HIGH_JUMP_GROUND:
-            desired_vel_x = (ball_intercept.physics.location.x - car_obj.physics.location.x) / seconds_until_intercept
+            desired_vel_x = (ball_intercept.physics.location.x - car.location.x) / seconds_until_intercept
             desired_vel_x *= 1.1
-            controller_state.throttle = (desired_vel_x - car_obj.physics.velocity.x)
+            controller_state.throttle = (desired_vel_x - car.velocity.x)
         else:
             self.logger.warn(f'invalid state {state}')
         controller_state.throttle = clamp(controller_state.throttle, -1, 1)
         controller_state.steer = clamp(controller_state.steer, -1, 1)
 
-        self.render(ball_intercept, seconds_until_intercept, state)
+        self.render_ball_intercept(ball_intercept, seconds_until_intercept, state)
 
         return controller_state
 
-    def render(self, ball_intercept: BallPredictionSlice, seconds_until_intercept: float, state):
+    def render_ball_intercept(self, ball_intercept: BallPredictionSlice, seconds_until_intercept: float, state):
         self.renderer.begin_rendering('block intercept')
         location = ball_intercept.physics.location
         def vec3(x,z):
@@ -296,16 +298,15 @@ class LineGoalie(BaseAgent):
         elif state == self.State.JUMPING: color_func = self.renderer.red
         elif state == self.State.DODGING: color_func = self.renderer.white
         elif state == self.State.IDLE: color_func = self.renderer.green
+        elif state == self.State.HIGH_JUMP_GROUND: color_func = lambda: self.renderer.create_color(255, 70, 70, 255)
+        elif state == self.State.HIGH_JUMP: color_func = self.renderer.blue
         else: color_func = self.renderer.orange
         self.renderer.draw_rect_3d(location, 10, 10, True, color_func(), True)
         self.renderer.end_rendering()
 
-    def render_horizontal_line(self, y, z, x_min=-1000, x_max=1000):
+    def render_horizontal_line(self, y, z, x_min=-900, x_max=900):
         self.renderer.begin_rendering()
-        self.renderer.draw_line_3d(
-            [x_min, y, z],
-            [x_max, y, z],
-            self.renderer.create_color(255, 10, 255, 10)
-        )
-        # print('aa')
+        self.renderer.draw_line_3d([x_min, y+ 0, z], [x_max, y+ 0, z], self.renderer.create_color(200, 10, 255, 10))
+        self.renderer.draw_line_3d([x_min, y+20, z], [x_max, y+20, z], self.renderer.create_color(200, 10, 255, 10))
+        self.renderer.draw_line_3d([x_min, y-20, z], [x_max, y-20, z], self.renderer.create_color(200, 10, 255, 10))
         self.renderer.end_rendering()
