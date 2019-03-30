@@ -89,7 +89,7 @@ class LineGoalie(BaseAgent):
     DODGE_BEFORE_INTERCEPT_SECONDS = .45
     HEIGHT_BEFORE_DODGING = 50
 
-    MIN_HIGH_JUMP_Z = 210  # minumum height of the predicted ball to get into the HIGH_JUMP state.
+    MIN_HIGH_JUMP_Z = 200  # minumum height of the predicted ball to get into the HIGH_JUMP state.
     MAX_HIGH_JUMP_Z = 630  # When not to jump at all because the ball it soo hightg
 
 
@@ -169,11 +169,15 @@ class LineGoalie(BaseAgent):
             else:
                 state = self.State.IDLE
         else:
-            if ball_intercept.physics.location.z > self.MIN_HIGH_JUMP_Z:
+            if not is_travelling_towards_line:
+                state = self.State.IDLE
+            elif ball_intercept.physics.location.z > self.MIN_HIGH_JUMP_Z:
                 state = self.State.HIGH_JUMP
             else:
                 if car.location.z <= self.HEIGHT_BEFORE_DODGING:
                     state = self.State.JUMPING
+                elif car_obj.double_jumped:
+                    state = self.State.IDLE
                 else:
                     state = self.State.DODGING
 
@@ -238,14 +242,21 @@ class LineGoalie(BaseAgent):
             ball_intercept.physics.location.z = 100
             controller_state.throttle = forward_adjust(ball_intercept.physics.location.x)
             steer_to_stay_on_line()
-            seconds_until_intercept = 2.
+            seconds_until_intercept = 2.5
+            if not car_obj.has_wheel_contact:
+                # Hacky pitch/yaw/roll control. See NomBot for a better implementation.
+                controller_state.pitch = -4 * car.rotation.pitch
+                controller_state.yaw   = -4 * car.rotation.yaw
+                controller_state.roll  = -5 * car.rotation.roll
+                controller_state.pitch = min(1, max(-1, controller_state.pitch))
+                controller_state.roll  = min(1, max(-1, controller_state.roll))
+                controller_state.yaw   = min(1, max(-1, controller_state.yaw))
+
         elif state == self.State.HIGH_JUMP:
-            # if car_obj.has_wheel_contact:
-            #     controller_state
             z = car.location.z
             controller_state.jump = not (110 < z < 120)
             if car_obj.double_jumped:
-                controller_state.pitch = min(1, max(-1, 5*(.8-car.rotation.pitch)))
+                controller_state.pitch = min(1, max(-1, 5*(.9-car.rotation.pitch)))
         elif state == self.State.HIGH_JUMP_GROUND:
             desired_vel_x = (ball_intercept.physics.location.x - car.location.x) / seconds_until_intercept
             desired_vel_x *= 1.1
