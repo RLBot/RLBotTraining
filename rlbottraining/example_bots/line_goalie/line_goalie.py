@@ -240,7 +240,7 @@ class LineGoalie(BaseAgent):
             # Try to stay aligned with the x axis.
             car_yaw = zero_centered_angle(car.rotation.yaw)
             to_desired_car_y = desired_car_y - car.location.y
-            desired_yaw = min(pi/2, max(-pi/2, 0.004 * to_desired_car_y))
+            desired_yaw = min(pi/3, max(-pi/3, 0.004 * to_desired_car_y))
             if desired_car_x < car.location.x:
                 desired_yaw *= -1
 
