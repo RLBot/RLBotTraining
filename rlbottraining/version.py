@@ -1,6 +1,6 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 release_notes = {
     '0.3.2': '''
@@ -8,6 +8,7 @@ release_notes = {
         - Made this website pick up live changes (code and results) - DomNomNom
         - Added a syntax highlighting json viewer to view details of results - DomNomNom
         - Fix some directories missing __init__.py files - DomNomNom
+        - Made line_goalie save shots on every location of the goal.
     ''',
 
     '0.2.1': '''
