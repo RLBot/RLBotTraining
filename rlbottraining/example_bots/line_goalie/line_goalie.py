@@ -3,6 +3,7 @@ from typing import Tuple
 from enum import Enum
 from collections import deque, Counter
 from contextlib import contextmanager
+from math import pi
 
 
 from rlbot.agents.base_agent import BaseAgent, SimpleControllerState
@@ -92,6 +93,7 @@ class LineGoalie(BaseAgent):
     MIN_HIGH_JUMP_Z = 200  # minumum height of the predicted ball to get into the HIGH_JUMP state.
     MAX_HIGH_JUMP_Z = 630  # When not to jump at all because the ball it soo hightg
 
+    DESIRED_OFFSET_FROM_OWN_GOAL_Y = 100
 
     class State(Enum):
         GROUND = 1
@@ -183,7 +185,9 @@ class LineGoalie(BaseAgent):
 
         assert state
 
-        self.render_horizontal_line(car.location.y, self.MIN_HIGH_JUMP_Z)
+        to_enemy_goal_y = 1 if self.team == 0 else -1
+        desired_car_y = -5120 * to_enemy_goal_y + self.DESIRED_OFFSET_FROM_OWN_GOAL_Y * to_enemy_goal_y
+        self.render_horizontal_line(desired_car_y, self.MIN_HIGH_JUMP_Z)
 
         # De-noise state
         self.state_history_counter[self.state_history.popleft()] -= 1
@@ -201,17 +205,6 @@ class LineGoalie(BaseAgent):
                 1.0 * (desired_x - car.location.x) +
                 0.3 * (0 - car.velocity.x)
             )
-        def steer_to_stay_on_line():
-            # Try to stay aligned with the x axis.
-            car_yaw = zero_centered_angle(car.rotation.yaw)
-            car_yaw_vel = car.angular_velocity.z
-            controller_state.steer = (
-                # PD-controller
-                1.0 * (0 - car_yaw) +
-                0.1 * (0 - car_yaw_vel)
-            )
-            if controller_state.throttle < 1:
-                controller_state.steer *= -1
 
         if state == self.State.GROUND:
             # Drive to ball_intercept.physics.location.x
@@ -220,6 +213,7 @@ class LineGoalie(BaseAgent):
 
         elif state == self.State.JUMPING:
             controller_state.jump = True
+
         elif state == self.State.DODGING:
             self.ticks_in_dodge_state += 1
             if self.ticks_in_dodge_state < 2:
@@ -236,15 +230,30 @@ class LineGoalie(BaseAgent):
                 controller_state.jump = True
             else:
                 controller_state.jump = False
+
         elif state == self.State.IDLE:
-            # assigning to ball_intercept for rendering.
-            ball_intercept.physics.location.x = 0.4 * game_tick_packet.game_ball.physics.location.x
-            ball_intercept.physics.location.z = 100
-            controller_state.throttle = forward_adjust(ball_intercept.physics.location.x)
-            steer_to_stay_on_line()
-            seconds_until_intercept = 2.5
+            desired_car_x = 0.4 * game_tick_packet.game_ball.physics.location.x
+            controller_state.throttle = forward_adjust(desired_car_x)
+            is_close_x = abs(car.location.x - desired_car_x) < 50
+            if is_close_x and game_tick_packet.game_info.seconds_elapsed % 1 < .5:
+                controller_state.throttle = -1
+            # Try to stay aligned with the x axis.
+            car_yaw = zero_centered_angle(car.rotation.yaw)
+            to_desired_car_y = desired_car_y - car.location.y
+            desired_yaw = min(pi/2, max(-pi/2, 0.004 * to_desired_car_y))
+            if desired_car_x < car.location.x:
+                desired_yaw *= -1
+
+            car_yaw_vel = car.angular_velocity.z
+            controller_state.steer = ( # PD-controller
+                5.0 * (desired_yaw - car_yaw) +
+                0.1 * (0 - car_yaw_vel)
+            )
+            if controller_state.throttle < 1:
+                controller_state.steer *= -1
             if not car_obj.has_wheel_contact:
                 # Hacky pitch/yaw/roll control. See NomBot for a better implementation.
+                # Only works because desired rotation vector is (0,0,0).
                 controller_state.pitch = -4 * car.rotation.pitch
                 controller_state.yaw   = -4 * car.rotation.yaw
                 controller_state.roll  = -5 * car.rotation.roll
@@ -252,17 +261,28 @@ class LineGoalie(BaseAgent):
                 controller_state.roll  = min(1, max(-1, controller_state.roll))
                 controller_state.yaw   = min(1, max(-1, controller_state.yaw))
 
+            # asign stuff just for rendering.
+            seconds_until_intercept = 2.5
+            ball_intercept.physics.location.x = desired_car_x
+            ball_intercept.physics.location.z = 100
+
         elif state == self.State.HIGH_JUMP:
             z = car.location.z
             controller_state.jump = not (110 < z < 120)
             if car_obj.double_jumped:
                 controller_state.pitch = min(1, max(-1, 5*(.9-car.rotation.pitch)))
+
         elif state == self.State.HIGH_JUMP_GROUND:
-            desired_vel_x = (ball_intercept.physics.location.x - car.location.x) / seconds_until_intercept
-            desired_vel_x *= 1.1
+            if seconds_until_intercept == 0:
+                desired_vel_x = 0  # avoid division by zero
+            else:
+                desired_vel_x = (ball_intercept.physics.location.x - car.location.x) / seconds_until_intercept
+                desired_vel_x *= 1.1
             controller_state.throttle = (desired_vel_x - car.velocity.x)
+
         else:
             self.logger.warn(f'invalid state {state}')
+
         controller_state.throttle = clamp(controller_state.throttle, -1, 1)
         controller_state.steer = clamp(controller_state.steer, -1, 1)
 
