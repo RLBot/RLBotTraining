@@ -28,17 +28,20 @@ class CommonExercisesTest(unittest.TestCase):
             got_grades.append(result.grade.__class__.__name__)
         self.assertEqual(got_grades, want_grades)
 
-    def test_ball_prediction(self):
-        from rlbottraining.common_exercises.ball_prediction import make_default_playlist
-        results = list(run_playlist(make_default_playlist()))
-        self.assertEqual(len(results), 2)
-        for result in results:
-            self.assertIsInstance(result.grade, Pass)
+    # def test_ball_prediction(self):
+    #     from rlbottraining.common_exercises.ball_prediction import make_default_playlist
+    #     results = list(run_playlist(make_default_playlist()))
+    #     self.assertEqual(len(results), 2)
+    #     for result in results:
+    #         self.assertIsInstance(result.grade, Pass)
 
-    def test_ball_prediction(self):
+    def test_bakkes_mod_import(self):
         from rlbottraining.common_exercises.bakkesmod_import.bakkesmod_importer import make_default_playlist
-        results = list(run_playlist(make_default_playlist()))
-        self.assertGreater(len(results), 2)
+        playlist = make_default_playlist()
+        assert len(playlist) > 2
+        playlist = playlist[:2]  # for making tests run quicker
+        results = list(run_playlist(playlist))
+        self.assertEqual(len(results), 2)
         for result in results:
             # All of these exercises are too advanced for SimpleBot.
             self.assertIsInstance(result.grade, Fail)
@@ -111,19 +114,20 @@ class CommonExercisesTest(unittest.TestCase):
             ['FailDueToTimeout']
         )
 
-    def test_versus_line_goalie(self):
-        from rlbottraining.common_exercises.versus_line_goalie import make_default_playlist
-        self.assertGrades(
-            run_playlist(make_default_playlist()),
-            ['WrongGoalFail']
-        )
-
     def test_wall_play(self):
         from rlbottraining.common_exercises.wall_play import make_default_playlist
         self.assertGrades(
             run_playlist(make_default_playlist()),
             ['FailDueToTimeout']
         )
+
+    # # Commented out because RLBot has a bug where it doesn't like chaning the number of players.
+    # def test_versus_line_goalie(self):
+    #     from rlbottraining.common_exercises.versus_line_goalie import make_default_playlist
+    #     self.assertGrades(
+    #         run_playlist(make_default_playlist()),
+    #         ['FailDueToTimeout', 'FailDueToTimeout']
+    #     )
 
 if __name__ == '__main__':
     unittest.main()

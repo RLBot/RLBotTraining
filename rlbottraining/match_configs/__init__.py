@@ -22,7 +22,7 @@ def make_match_config_with_players(player_configs: List[PlayerConfig]) -> MatchC
     Has some mutators which are usually useful for bot training.
     """
     match_config = make_empty_match_config()
-    match_config.player_configs = players
+    match_config.player_configs = player_configs
     return match_config
 
 

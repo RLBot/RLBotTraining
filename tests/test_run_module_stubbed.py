@@ -120,8 +120,8 @@ class RunModuleTest(unittest.TestCase):
                 'rlbottraining.common_exercises.bronze_striker.FacingAwayFromBallInFrontOfGoal'
             )
             self.assertLess(
-                results[0]['create_time_utc_seconds'],
-                results[1]['create_time_utc_seconds'],
+                results[0]['create_time']['iso8601'],
+                results[1]['create_time']['iso8601'],
             )
 
             self.assertEqual(
