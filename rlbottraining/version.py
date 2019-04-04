@@ -1,14 +1,16 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 release_notes = {
-    '0.3.2': '''
+    '0.3.4': '''
         - Added a website to summarize past runs - DomNomNom
         - Made this website pick up live changes (code and results) - DomNomNom
         - Added a syntax highlighting json viewer to view details of results - DomNomNom
         - Fix some directories missing __init__.py files - DomNomNom
-        - Made line_goalie save shots on every location of the goal.
+        - Made line_goalie save shots on every location of the goal - DomNomNom
+        - Provided example json of a Rocket League custom training - Bakkes
+        - Added exercise code for Rocket League custom training - DomNomNom
     ''',
 
     '0.2.1': '''

@@ -21,6 +21,7 @@ setuptools.setup(
         'rlbot>=1.13.2',
         'docopt',
         'watchdog',
+        'numpy',
     ],
     python_requires='>=3.7.0',
     version=version.__version__,
@@ -46,6 +47,7 @@ setuptools.setup(
             f'{paths._match_config_dir}/*.cfg',
             f'{paths._example_bot_dir}/*/*.cfg',
             str(paths._website_static_source),
+            str(paths._example_rl_custom_training_json),
         ]
     },
 )

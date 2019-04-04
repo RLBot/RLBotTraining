@@ -18,6 +18,7 @@ _match_config_dir = _rlbot_training_dir / 'match_configs'
 _website_source = _rlbot_training_dir / 'history' / 'website'
 _website_dev_server = _website_source / 'dev_server.py'
 _website_static_source = _website_source / 'static'
+_example_rl_custom_training_json = _common_exercises_dir / 'rl_custom_training_import' / '7657-2F43-9B3A-C1F1.json'
 # You may rely on the ones below.
 
 class BotConfigs:

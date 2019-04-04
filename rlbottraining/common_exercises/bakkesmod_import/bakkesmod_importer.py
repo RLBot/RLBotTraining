@@ -1,5 +1,4 @@
 import json
-import random
 import urllib.request
 from pathlib import Path
 from typing import Mapping, Any, List
