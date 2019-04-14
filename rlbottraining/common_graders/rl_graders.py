@@ -65,7 +65,7 @@ class FailOnBallOnGroundAfterTimeout(FailOnTimeout):
                         # fallback on old behaviour
                         if ball.location.z < 100 and ball.velocity.z >= 0:
                             hit_ground = True
-        if math.sqrt(ball.velocity.x**2 + ball.velocity.y**2 + ball.velocity.x**2) == 0:
+        if math.sqrt(ball.velocity.x**2 + ball.velocity.y**2 + ball.velocity.z**2) == 0:
             # ball is stop on ground, which means it should fail anyway
             hit_ground = True
 
