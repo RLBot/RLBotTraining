@@ -35,11 +35,31 @@ class FailOnBallOnGroundAfterTimeout(FailOnTimeout):
         self.previous_ang_x = None
         self.previous_ang_y = None
         self.previous_ang_z = None
+        self.previous_total_goals = None
 
-    def set_previous_angular_velocity(self, ball):
-        self.previous_ang_x = ball.angular_velocity.x
-        self.previous_ang_y = ball.angular_velocity.y
-        self.previous_ang_z = ball.angular_velocity.z
+    def set_previous_angular_velocity(self, ball, reset = False):
+        if not reset:
+            self.previous_ang_x = ball.angular_velocity.x
+            self.previous_ang_y = ball.angular_velocity.y
+            self.previous_ang_z = ball.angular_velocity.z
+        else:
+            self.previous_ang_x = None
+            self.previous_ang_y = None
+            self.previous_ang_z = None
+
+    def set_previous_total_goals(self, total_goals, reset=False):
+        if not reset:
+            self.previous_total_goals = total_goals
+        else:
+            self.previous_total_goals = None
+
+    def current_total_goals(self, packet):
+        total_goals = 0
+        for car_id in range(packet.num_cars):
+            goal = packet.game_cars[car_id].score_info.goals
+            own_goal = packet.game_cars[car_id].score_info.own_goals
+            total_goals += goal + own_goal
+        return total_goals
 
     def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
         grade = super().on_tick(tick)
@@ -67,8 +87,14 @@ class FailOnBallOnGroundAfterTimeout(FailOnTimeout):
                             hit_ground = True
         if math.sqrt(ball.velocity.x**2 + ball.velocity.y**2 + ball.velocity.z**2) == 0:
             # ball is stop on ground, which means it should fail anyway
-            hit_ground = True
+            if self.previous_total_goals != self.current_total_goals(tick.game_tick_packet):
+                # There was a goal, let the goal handler handle it
+                hit_ground = False
+            else:
+                hit_ground = True
 
         self.set_previous_angular_velocity(ball)
+        self.set_previous_total_goals(self.current_total_goals(tick.game_tick_packet))
         if hit_ground:
+            self.set_previous_angular_velocity(ball, reset = True)
             return grade
