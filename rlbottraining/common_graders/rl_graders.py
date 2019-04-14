@@ -42,10 +42,12 @@ class FailOnBallOnGroundAfterTimeout(FailOnTimeout):
             self.previous_ang_x = ball.angular_velocity.x
             self.previous_ang_y = ball.angular_velocity.y
             self.previous_ang_z = ball.angular_velocity.z
+            self.previous_vel_z = ball.velocity.z
         else:
             self.previous_ang_x = None
             self.previous_ang_y = None
             self.previous_ang_z = None
+            self.previous_vel_z = None
 
     def set_previous_total_goals(self, total_goals, reset=False):
         if not reset:
@@ -77,16 +79,20 @@ class FailOnBallOnGroundAfterTimeout(FailOnTimeout):
             if ball.location.z <= 1900:  #Making sure it doesnt count the ceiling
                 if (ball.angular_velocity.x != self.previous_ang_x or ball.angular_velocity.y != self.previous_ang_y):
                     # If the ball hit anything its angular velocity will change in the x or y axis
-                    if self.previous_ang_z == ball.angular_velocity.z:
+                    if self.previous_ang_z == ball.angular_velocity.z and not ( 130 < ball.location.z < 150) :
                         # if the z angular velocity did not change it means it was a flat plane.
+                        #ignore dribbling
                         hit_ground = True
                     elif previous_ang_norm == max_ang_vel:
                         # if it was at maximum angular velocity, it may have changed z axis not to exceed max
                         # fallback on old behaviour
                         if ball.location.z < 100 and ball.velocity.z >= 0:
                             hit_ground = True
-        if math.sqrt(ball.velocity.x**2 + ball.velocity.y**2 + ball.velocity.z**2) == 0:
-            # ball is stop on ground, which means it should fail anyway
+                    if ball.location.z <= 93.5 and ball.velocity.z >= 0:
+                        # if the car is pushing the ball on the ground
+                        hit_ground = True
+        if math.sqrt(ball.velocity.x**2 + ball.velocity.y**2 + ball.velocity.z**2) == 0 and self.previous_vel_z != 0:
+            # ball is stop on ground and not on its apex, which means it should fail anyway
             if self.previous_total_goals != self.current_total_goals(tick.game_tick_packet):
                 # There was a goal, let the goal handler handle it
                 hit_ground = False
