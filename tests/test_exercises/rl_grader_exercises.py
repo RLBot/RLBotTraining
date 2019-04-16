@@ -17,6 +17,30 @@ from rlbottraining.match_configs import make_default_match_config
 test_match_config = make_default_match_config()
 
 @dataclass
+class Still(RocketLeagueCustomStrikerTraining):
+
+    """Ball keeps perfectly still"""
+
+    grader: Grader = RocketLeagueStrikerGrader(timeout_seconds=4, timeout_override=True, ground_override=True)
+    test_match_config.player_configs = [PlayerConfig.bot_config(BotConfigs.prop_bot, Team.BLUE), ]
+    test_match_config.game_map = "ThrowbackStadium"
+    match_config: MatchConfig = test_match_config
+
+    def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
+        car_pos = Vector3(5000, 0, 0)
+        ball_pos = Vector3(0, 0, 0)
+        ball_vel = Vector3(0, 0, 0)
+        ball_ang_vel = Vector3(0, 0, 0)
+
+        ball_state = BallState(Physics(location=ball_pos, velocity=ball_vel, angular_velocity=ball_ang_vel))
+        car_state = CarState(boost_amount=100, jumped=False, double_jumped=False,
+                             physics=Physics(location=car_pos, rotation=Rotator(0, 0, 0), velocity=Vector3(0, 0, 0),
+                                             angular_velocity=Vector3(0, 0, 0)))
+        enemy_car = CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
+        game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
+        return game_state
+
+@dataclass
 class SimpleFallFromPerfectStill(RocketLeagueCustomStrikerTraining):
 
     """Ball starts perfectly still"""
@@ -39,7 +63,6 @@ class SimpleFallFromPerfectStill(RocketLeagueCustomStrikerTraining):
         enemy_car = CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
         game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
         return game_state
-
 
 @dataclass
 class SimpleFallFromRotatingStill(RocketLeagueCustomStrikerTraining):
@@ -65,10 +88,60 @@ class SimpleFallFromRotatingStill(RocketLeagueCustomStrikerTraining):
         game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
         return game_state
 
+@dataclass
+class RollFromGround(RocketLeagueCustomStrikerTraining):
+
+    """Ball starts only with angular velocity"""
+
+    grader: Grader = RocketLeagueStrikerGrader(timeout_seconds=2, timeout_override=True, ground_override=True)
+    test_match_config.player_configs = [PlayerConfig.bot_config(BotConfigs.prop_bot, Team.BLUE), ]
+    test_match_config.game_map = "ThrowbackStadium"
+    match_config: MatchConfig = test_match_config
+
+    def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
+        car_pos = Vector3(5600, 0, 0)
+        ball_pos = Vector3(rng.randrange(-800, 800), rng.randrange(-5000, 5000), 93)
+        ball_vel = Vector3(rng.randrange(-2000, 2000), rng.randrange(-2000, 2000), 0)
+        ball_ang_vel = Vector3(0, 0, 0)
+
+        ball_state = BallState(Physics(location=ball_pos, velocity=ball_vel, angular_velocity=ball_ang_vel))
+        car_state = CarState(boost_amount=100, jumped=False, double_jumped=False,
+                             physics=Physics(location=car_pos, rotation=Rotator(0, 0, 0), velocity=Vector3(0, 0, 0),
+                                             angular_velocity=Vector3(0, 0, 0)))
+        enemy_car = CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
+        game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
+        return game_state
+
+@dataclass
+class SimpleFallOnCar(RocketLeagueCustomStrikerTraining):
+
+    """Ball starts perfectly still onto a car"""
+
+    grader: Grader = RocketLeagueStrikerGrader(timeout_seconds=5, timeout_override=True, ground_override=True)
+    test_match_config.player_configs = [PlayerConfig.bot_config(BotConfigs.prop_bot, Team.BLUE), ]
+    test_match_config.game_map = "ThrowbackStadium"
+    match_config: MatchConfig = test_match_config
+
+    def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
+        car_pos = Vector3(0, 0, 0)
+        ball_pos = Vector3(0, 0, 1900)
+        ball_vel = Vector3(0, 0, 0)
+        ball_ang_vel = Vector3(0, 0, 0)
+
+        ball_state = BallState(Physics(location=ball_pos, velocity=ball_vel, angular_velocity=ball_ang_vel))
+        car_state = CarState(boost_amount=100, jumped=False, double_jumped=False,
+                             physics=Physics(location=car_pos, rotation=Rotator(0, 0, 0), velocity=Vector3(0, 0, 0),
+                                             angular_velocity=Vector3(0, 0, 0)))
+        enemy_car = CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
+        game_state = GameState(ball=ball_state, cars={0: car_state, 1: enemy_car})
+        return game_state
 
 
 def make_default_playlist() -> Playlist:
     return [
+        Still('Ball Still'),
         SimpleFallFromPerfectStill('Fall From Perfect Still'),
+        RollFromGround('Roll From Ground'),
+        SimpleFallOnCar('Fall On Car'),
         #SimpleFallFromRotatingStill('Fall with rotation'),
     ]

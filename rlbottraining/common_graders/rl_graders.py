@@ -17,6 +17,7 @@ from rlbottraining.common_graders.compound_grader import CompoundGrader
 from rlbottraining.common_graders.timeout import FailOnTimeout, PassOnTimeout
 from rlbottraining.common_graders.goal_grader import PassOnGoalForAllyTeam
 from rlbot.training.training import Pass, Fail, Grade
+import copy
 
 
 class RocketLeagueStrikerGrader(CompoundGrader):
@@ -60,10 +61,7 @@ class RocketLeagueStrikerGrader(CompoundGrader):
 
 class FailOnBallOnGround(Grader):
     def __init__(self):
-        self.previous_ang_x = None
-        self.previous_ang_y = None
-        self.previous_ang_z = None
-        self.previous_total_goals = None
+        self.previous_ball = None
 
     class FailDueToGroundHit(Fail):
         def __init__(self):
@@ -73,66 +71,94 @@ class FailOnBallOnGround(Grader):
             return f'{super().__repr__()}: Ball hit the ground'
 
 
-    def set_previous_angular_velocity(self, ball, reset = False):
-        if not reset:
-            self.previous_ang_x = ball.angular_velocity.x
-            self.previous_ang_y = ball.angular_velocity.y
-            self.previous_ang_z = ball.angular_velocity.z
-            self.previous_vel_z = ball.velocity.z
-        else:
-            self.previous_ang_x = None
-            self.previous_ang_y = None
-            self.previous_ang_z = None
-            self.previous_vel_z = None
-
-    def set_previous_total_goals(self, total_goals, reset=False):
-        if not reset:
-            self.previous_total_goals = total_goals
-        else:
-            self.previous_total_goals = None
-
-    def current_total_goals(self, packet):
-        total_goals = 0
-        for car_id in range(packet.num_cars):
-            goal = packet.game_cars[car_id].score_info.goals
-            own_goal = packet.game_cars[car_id].score_info.own_goals
-            total_goals += goal + own_goal
-        return total_goals
+    def set_previous_info(self, ball):
+        self.previous_ball = copy.deepcopy(ball)
 
     def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
-        ball = tick.game_tick_packet.game_ball.physics
+        packet = tick.game_tick_packet
+        ball = packet.game_ball.physics
         hit_ground = False
 
-        if self.previous_ang_z is None:
-            self.set_previous_angular_velocity(ball)
-        else:
-            max_ang_vel = 5.9999601985025075  #Max angular velocity possible
-            previous_ang_norm = math.sqrt(self.previous_ang_x**2 + self.previous_ang_y**2 + self.previous_ang_z**2)
-            if ball.location.z <= 1900:  #Making sure it doesnt count the ceiling
-                if (ball.angular_velocity.x != self.previous_ang_x or ball.angular_velocity.y != self.previous_ang_y):
-                    # If the ball hit anything its angular velocity will change in the x or y axis
-                    if self.previous_ang_z == ball.angular_velocity.z and not ( 130 < ball.location.z < 150) :
-                        # if the z angular velocity did not change it means it was a flat plane.
-                        #ignore dribbling
-                        hit_ground = True
-                    elif previous_ang_norm == max_ang_vel:
-                        # if it was at maximum angular velocity, it may have changed z axis not to exceed max
-                        # fallback on old behaviour
-                        if ball.location.z < 100 and ball.velocity.z >= 0:
-                            hit_ground = True
-                    if ball.location.z <= 93.5 and ball.velocity.z >= 0:
-                        # if the car is pushing the ball on the ground
-                        hit_ground = True
-        if math.sqrt(ball.velocity.x**2 + ball.velocity.y**2 + ball.velocity.z**2) == 0 and self.previous_vel_z != 0:
-            # ball is stop on ground and not on its apex, which means it should fail anyway
-            if self.previous_total_goals != self.current_total_goals(tick.game_tick_packet):
-                # There was a goal, let the goal handler handle it
-                hit_ground = False
-            else:
-                hit_ground = True
+        if self.previous_ball is None:
+            self.set_previous_info(ball)
+            return None
 
-        self.set_previous_angular_velocity(ball)
-        self.set_previous_total_goals(self.current_total_goals(tick.game_tick_packet))
+        max_ang_vel = 5.9999601985025075  #Max angular velocity possible
+        previous_angular_velocity_norm = math.sqrt(self.previous_ball.angular_velocity.x**2 +
+                                                   self.previous_ball.angular_velocity.y**2 +
+                                                   self.previous_ball.angular_velocity.z**2 )
+
+        angular_velocity_norm = math.sqrt(ball.angular_velocity.x**2 +
+                                          ball.angular_velocity.y**2 +
+                                          ball.angular_velocity.z**2 )
+
+        if ball.location.z <= 1900:  #Making sure it doesnt count the ceiling
+
+            if ball.angular_velocity.x != self.previous_ball.angular_velocity.x or \
+               ball.angular_velocity.y != self.previous_ball.angular_velocity.y or \
+               ball.angular_velocity.z != self.previous_ball.angular_velocity.z:
+                # If the ball hit anything its angular velocity will change in at least one axis
+                if (previous_angular_velocity_norm or angular_velocity_norm) == max_ang_vel:
+                    '''
+                    Implement correct way of dealing with maximum angular velocity
+                    angular velocity gets rescaled which may change an axis that truly did not change, only got rescaled
+                    '''
+                    #Todo: implement detection for this case
+                    self.set_previous_info(ball)
+                    return None
+
+                elif self.previous_ball.angular_velocity.z == ball.angular_velocity.z:
+                    '''
+                    Ball hit a flat horizontal surface
+                    this only changes angular velocity z 
+                    we still have to deal with distingushing from a ground touch, or a bot touch
+                    This will not hold true if the ball is being pushed on the ground by a bot.
+                    Todo: detect pushing from bot
+                    '''
+                    print('INFO')
+                    print(packet.game_ball.latest_touch.time_seconds)
+                    print(packet.game_info.seconds_elapsed - (2/60))
+
+                    if packet.game_ball.latest_touch.time_seconds >= (packet.game_info.seconds_elapsed - (2/60)):
+                        '''
+                        if there was a touch this tick the bot may be dribbling
+                        '''
+                        #Todo: distinguish dribble from pushing on ground.
+                        #Todo: write tests to test pushing.
+                        self.set_previous_info(ball)
+                        return None
+                    else:
+                        hit_ground = True
+                else:
+                    '''
+                    detect if is being pushed
+                    '''
+                    if packet.game_ball.latest_touch.time_seconds != packet.game_info.seconds_elapsed:
+                        '''
+                        ball not hit by a bot on this tick
+                        '''
+                        self.set_previous_info(ball)
+                        return None
+                    else:
+                        '''
+                        detect if its pushing along the ground or not
+                        '''
+                        #Todo: implement detection for this case
+                        pass
+
+            velocity_norm = math.sqrt(ball.velocity.x**2 +
+                                      ball.velocity.y**2 +
+                                      ball.velocity.z**2)
+
+
+            previous_velocity_norm = math.sqrt(self.previous_ball.velocity.x ** 2 +
+                                               self.previous_ball.velocity.y ** 2 +
+                                               self.previous_ball.velocity.z ** 2 )
+            if previous_velocity_norm == velocity_norm == 0:
+                '''
+                ball is stopped on ground
+                '''
+                hit_ground = True
+        self.set_previous_info(ball)
         if hit_ground:
-            self.set_previous_angular_velocity(ball, reset = True)
             return self.FailDueToGroundHit()
