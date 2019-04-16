@@ -26,6 +26,7 @@ class BotConfigs:
     Contains paths to example bots included in this repo.
     """
     brick_bot = _example_bot_dir / 'brick_bot' / 'brick_bot.cfg'
+    prop_bot = _example_bot_dir / 'prop_bot' / 'prop_bot.cfg'
     simple_bot = _example_bot_dir / 'simple_bot' / 'simple_bot.cfg'
     line_goalie = _example_bot_dir / 'line_goalie' / 'line_goalie.cfg'
 
