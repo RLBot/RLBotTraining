@@ -16,6 +16,7 @@ from rlbottraining.grading.training_tick_packet import TrainingTickPacket
 from rlbottraining.common_graders.compound_grader import CompoundGrader
 from rlbottraining.common_graders.timeout import FailOnTimeout, PassOnTimeout
 from rlbottraining.common_graders.goal_grader import PassOnGoalForAllyTeam
+from rlbot.training.training import Pass, Fail, Grade
 
 
 class RocketLeagueStrikerGrader(CompoundGrader):
@@ -23,19 +24,54 @@ class RocketLeagueStrikerGrader(CompoundGrader):
     A Grader which aims to match the striker training.
     """
 
-    def __init__(self, timeout_seconds=4.0, ally_team=0):
+    def __init__(self, timeout_seconds=4.0, ally_team=0, timeout_override=False, ground_override=False):
+        self.timeout_override = timeout_override
+        self.ground_override = ground_override
         super().__init__([
             PassOnGoalForAllyTeam(ally_team),
-            FailOnBallOnGroundAfterTimeout(timeout_seconds),
+            FailOnBallOnGround(),
+            FailOnTimeout(timeout_seconds),
         ])
 
-class FailOnBallOnGroundAfterTimeout(FailOnTimeout):
-    def __init__(self, max_duration_seconds):
-        super().__init__(max_duration_seconds)
+    def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
+        grades = [grader.on_tick(tick) for grader in self.graders]
+        return self.grade_chooser(grades)
+
+    def grade_chooser(self, grades) -> Optional[Grade]:
+        """
+        Chooses the importance of the grades
+        """
+
+        timeout = isinstance(grades[2], Fail)  # True if timed out, false otherwise
+        ball_on_ground = isinstance(grades[1], Fail)  # True if ball touched the ground, false otherwise
+        goal = isinstance(grades[0], Pass)  # True if ball there was a goal, false otherwise
+
+        if goal:  # scoring and touching the ground on the same tick prefer scoring
+            return grades[0]
+        elif timeout:
+            if self.timeout_override:
+                return grades[2]
+            elif ball_on_ground:
+                return grades[1]
+        elif self.ground_override and ball_on_ground:
+            return grades[1]
+        return None
+
+
+class FailOnBallOnGround(Grader):
+    def __init__(self):
         self.previous_ang_x = None
         self.previous_ang_y = None
         self.previous_ang_z = None
         self.previous_total_goals = None
+
+    class FailDueToGroundHit(Fail):
+        def __init__(self):
+            pass
+
+        def __repr__(self):
+            return f'{super().__repr__()}: Ball hit the ground'
+
 
     def set_previous_angular_velocity(self, ball, reset = False):
         if not reset:
@@ -64,10 +100,6 @@ class FailOnBallOnGroundAfterTimeout(FailOnTimeout):
         return total_goals
 
     def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
-        grade = super().on_tick(tick)
-        if grade is None:
-            return None
-        assert isinstance(grade, FailOnTimeout.FailDueToTimeout)
         ball = tick.game_tick_packet.game_ball.physics
         hit_ground = False
 
@@ -103,4 +135,4 @@ class FailOnBallOnGroundAfterTimeout(FailOnTimeout):
         self.set_previous_total_goals(self.current_total_goals(tick.game_tick_packet))
         if hit_ground:
             self.set_previous_angular_velocity(ball, reset = True)
-            return grade
+            return self.FailDueToGroundHit()
