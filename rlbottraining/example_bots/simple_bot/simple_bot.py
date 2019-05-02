@@ -10,6 +10,8 @@ class SimpleBot(BaseAgent):
     exactly away from the ball, it does not turn to face the ball.
     """
 
+    steering_coefficient = 5.0
+
     def get_output(self, game_tick_packet: GameTickPacket) -> SimpleControllerState:
         # Get the direction to the ball
         car = game_tick_packet.game_cars[self.index]
@@ -30,7 +32,7 @@ class SimpleBot(BaseAgent):
         # Act on the information above.
         controller_state = SimpleControllerState()
         controller_state.throttle = 1.0
-        controller_state.steer = min(1, max(-1, 5 * dot_product))
+        controller_state.steer = min(1, max(-1, steering_coefficient * dot_product))
         controller_state.boost = abs(dot_product) < .1
         controller_state.handbrake = abs(dot_product) > .9
         return controller_state

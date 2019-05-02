@@ -19,6 +19,7 @@ LOGGER_ID = 'training'
 def run_playlist(playlist: Playlist, seed: int = 4) -> Iterator[ExerciseResult]:
     with setup_manager_context() as setup_manager:
         wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
+
         for i, rlbot_result in enumerate(rlbot_run_exercises(setup_manager, wrapped_exercises, seed)):
             yield ExerciseResult(
                 grade=rlbot_result.grade,

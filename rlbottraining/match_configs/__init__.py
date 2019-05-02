@@ -1,11 +1,22 @@
 from pathlib import Path
-from typing import List
+from typing import List, Callable, Any
+import copy
 
 from rlbot.matchconfig.conversions import read_match_config_from_file
 from rlbot.matchconfig.match_config import MatchConfig, PlayerConfig, Team
 
 from rlbottraining.paths import BotConfigs, _match_config_dir
 
+def copy_memoize(func: Callable[[], Any]):
+    cache = None
+    def copy_memoize_wrapped():
+        nonlocal cache
+        if cache is None:
+            cache = func()
+        return copy.deepcopy(cache)
+    return copy_memoize_wrapped
+
+@copy_memoize
 def make_empty_match_config() -> MatchConfig:
     """
     Returns a parsed rlbot.cfg without any bots.
@@ -38,6 +49,7 @@ def make_match_config_with_bots(blue_bots: List[Path] = None, orange_bots: List[
     orange_players = [ PlayerConfig.bot_config(bot_path, Team.ORANGE) for bot_path in orange_bots]
     return make_match_config_with_players(blue_players + orange_players)
 
+@copy_memoize
 def make_default_match_config() -> MatchConfig:
     """
     Returns a match config containing a single, simple bot playing soccar.

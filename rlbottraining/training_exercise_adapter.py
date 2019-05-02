@@ -47,5 +47,11 @@ class TrainingExerciseAdapter(RLBotExercise):
         self.training_tick_packet.update(game_tick_packet)
         return self.exercise.grader.on_tick(self.training_tick_packet)
 
+    def on_briefing(self) -> Optional[Grade]:
+        return self.exercise.on_briefing()
+
+    def set_matchcomms_factory(self, matchcomms_factory: Callable[[], MatchcommsClient]):
+        self.exercise.matchcomms_factory = matchcomms_factory
+
     def render(self, renderer: RenderingManager):
         self.exercise.render(renderer)
