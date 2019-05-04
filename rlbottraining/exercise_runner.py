@@ -17,6 +17,9 @@ from rlbottraining.history.exercise_result import ExerciseResult, ReproductionIn
 LOGGER_ID = 'training'
 
 def run_playlist(playlist: Playlist, seed: int = 4) -> Iterator[ExerciseResult]:
+    """
+    This function runs the given exercises in the playlist once and returns the result for each.
+    """
     with setup_manager_context() as setup_manager:
         wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
 
@@ -37,7 +40,7 @@ class ReloadPolicy:
 
 def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = None, reload_policy=ReloadPolicy.EACH_EXERCISE):
     """
-    This method repeatedly runs exercises in the module and reloads the module to pick up
+    This function repeatedly runs exercises in the module and reloads the module to pick up
     any new changes to the Exercise. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
     """

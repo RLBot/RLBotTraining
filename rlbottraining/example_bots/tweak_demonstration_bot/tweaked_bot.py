@@ -2,8 +2,10 @@ from queue import Empty
 
 from rlbot.agents.base_agent import SimpleControllerState
 from rlbot.utils.structures.game_data_struct import GameTickPacket
+from rlbot.matchcomms.common_uses.set_attributes_message import handle_set_attributes_message
+from rlbot.matchcomms.common_uses.reply import reply_to
 
-from rlbottraining.example_bots.simple_bot import SimpleBot
+from rlbottraining.example_bots.simple_bot.simple_bot import SimpleBot
 
 
 
@@ -20,20 +22,13 @@ class TweakedBot(SimpleBot):
             except Empty:
                 break
 
-            # Ignore messages that are not for us.
-            # Note: We assume SimpleBot.get_output() does not try to read messages.
-            if not msg.get('is_example_tweak_msg', None):
-                continue
-            if msg.get('target_player_index', None) != self.index:
-                continue
-
-            tweaks = msg.get('tweaks', {})
-            # We're making an assumption that our base class has this attribute that we're tweaking.
-            assert hassattr(self, 'steering_coefficient')
-            if 'steering_coefficient' in tweaks:
-                self.steering_coefficient = tweaks['steering_coefficient']
+            if handle_set_attributes_message(msg, self, allowed_keys=['steering_coefficient']):
+                reply_to(self.matchcomms, msg)  # Let the sender know we've set the attribute.
             else:
-                self.logger.warning(f'Received a example_tweak_msg but it seemed empty. Here\'s the message: {msg}')
+                # Ignore messages that are not for us.
+                self.logger.debug(f'Unhandled message: {msg}')
+
 
         # Business as usual - this reads from self.steering_coefficient
+        # Note: This get_outout() call will not see the messages drained from self.matchcomms.incoming_broadcast above.
         return super().get_output(game_tick_packet)

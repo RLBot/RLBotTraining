@@ -27,6 +27,7 @@ class BotConfigs:
     """
     brick_bot = _example_bot_dir / 'brick_bot' / 'brick_bot.cfg'
     simple_bot = _example_bot_dir / 'simple_bot' / 'simple_bot.cfg'
+    tweaked_bot = _example_bot_dir / 'tweak_demonstration_bot' / 'tweaked_bot.cfg'
     line_goalie = _example_bot_dir / 'line_goalie' / 'line_goalie.cfg'
 
 class HistoryPaths:

@@ -20,8 +20,7 @@ class TrainingExercise(Metric):
     # MatchcommsClient connected to the current match
     _matchcomms: Optional[MatchcommsClient] = None
     matchcomms_factory: Callable[[], MatchcommsClient] = None  # Initialized externally.
-    @property
-    def matchcomms(self) -> MatchcommsClient:
+    def get_matchcomms(self) -> MatchcommsClient:
         if not self._matchcomms:
             assert self.matchcomms_factory
             self._matchcomms = self.matchcomms_factory()

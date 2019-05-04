@@ -1,7 +1,8 @@
 from random import Random
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Callable
 
+from rlbot.matchcomms.client import MatchcommsClient
 from rlbot.matchconfig.match_config import MatchConfig
 from rlbot.matchconfig.match_config import MatchConfig
 from rlbot.training.training import Exercise as RLBotExercise, Grade, Result as _Result

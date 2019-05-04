@@ -32,7 +32,7 @@ class SimpleBot(BaseAgent):
         # Act on the information above.
         controller_state = SimpleControllerState()
         controller_state.throttle = 1.0
-        controller_state.steer = min(1, max(-1, steering_coefficient * dot_product))
+        controller_state.steer = min(1, max(-1, self.steering_coefficient * dot_product))
         controller_state.boost = abs(dot_product) < .1
         controller_state.handbrake = abs(dot_product) > .9
         return controller_state
