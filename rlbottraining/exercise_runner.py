@@ -4,6 +4,7 @@ from typing import Dict, Tuple, Iterator, Optional, Callable
 import importlib
 import time
 import traceback
+from contextlib import contextmanager
 
 from rlbot.setup_manager import SetupManager, setup_manager_context
 from rlbot.training.training import run_exercises as rlbot_run_exercises
@@ -16,11 +17,11 @@ from rlbottraining.history.exercise_result import ExerciseResult, ReproductionIn
 
 LOGGER_ID = 'training'
 
-def run_playlist(playlist: Playlist, seed: int = 4) -> Iterator[ExerciseResult]:
+def run_playlist(playlist: Playlist, seed: int = 4, setup_manager: Optional[SetupManager]=None) -> Iterator[ExerciseResult]:
     """
     This function runs the given exercises in the playlist once and returns the result for each.
     """
-    with setup_manager_context() as setup_manager:
+    with use_or_create(setup_manager, setup_manager_context) as setup_manager:
         wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
 
         for i, rlbot_result in enumerate(rlbot_run_exercises(setup_manager, wrapped_exercises, seed)):
@@ -32,6 +33,14 @@ def run_playlist(playlist: Playlist, seed: int = 4) -> Iterator[ExerciseResult]:
                     playlist_index=i,
                 )
             )
+
+@contextmanager
+def use_or_create(existing_context, default_contextmanager):
+    if existing_context:
+        yield existing_context
+        return
+    with default_contextmanager() as context:
+        yield context
 
 class ReloadPolicy:
     NEVER = 1

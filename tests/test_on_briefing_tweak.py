@@ -9,6 +9,7 @@ from rlbot.matchcomms.common_uses.reply import send_and_wait_for_replies
 from rlbot.training.training import Grade, Pass, Fail
 from rlbot.matchconfig.match_config import MatchConfig
 from rlbot.utils.logging_utils import get_logger
+from rlbot.setup_manager import setup_manager_context
 
 from rlbottraining.training_exercise import TrainingExercise
 from rlbottraining.paths import BotConfigs
@@ -32,8 +33,6 @@ class TurnAndDriveToBall(TrainingExercise):
 
 
     def on_briefing(self) -> Optional[Grade]:
-        import time
-        time.sleep(0.1)  # TODO: retry in send_and_wait_for_replies
         _ = send_and_wait_for_replies(self.get_matchcomms(), [
             make_set_attributes_message(0, {'steering_coefficient': self.steering_coefficient}),
         ])
@@ -47,7 +46,7 @@ class TurnAndDriveToBall(TrainingExercise):
             cars={
                 0: CarState(
                     physics=Physics(
-                        location=Vector3(-200, 3000, 0),
+                        location=Vector3(0, 3400, 0),
                         rotation=Rotator(0, 0, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
@@ -66,7 +65,7 @@ class FunctionOptimizationResult:
 
 def naive_function_minimization(
         f: Callable[[float], float], min_x: float, max_x: float,
-        num_iterations: int=3, num_samples_each_iteration: int=7
+        num_iterations: int=2, num_samples_each_iteration: int=9
     ) -> FunctionOptimizationResult:
     """
     Tries to find a local minimum of the function f(x)
@@ -106,23 +105,28 @@ class TweakTest(unittest.TestCase):
         logger = get_logger('steering optimization')
         # We want to assert that this constant is better than other constants.
 
-        def f(steering_coefficient: float) -> float:
-            ex = TurnAndDriveToBall(
-                name=f'Turn to ball (steering_coefficient={steering_coefficient}',
-                steering_coefficient=steering_coefficient
-            )
-            result = list(run_playlist([ex]))[0]
-            grade = result.grade
-            assert isinstance(grade, GameTickPacketWrapperGrader.WrappedPass) or isinstance(grade, GameTickPacketWrapperGrader.WrappedFail), f'Unexpected grade: {grade}'
-            duration_seconds = grade.last_tick.game_info.seconds_elapsed - grade.first_tick.game_info.seconds_elapsed
-            logger.info(f'intermediate result: {duration_seconds}')
-            return duration_seconds
+        # Hold the setup_manager here such that we don't need to shutdown/relaunch everything all the time.
+        with setup_manager_context() as setup_manager:
+            def time_to_goal(steering_coefficient: float) -> float:
+                ex = TurnAndDriveToBall(
+                    name=f'Turn to ball (steering_coefficient={steering_coefficient:.2f})',
+                    steering_coefficient=steering_coefficient
+                )
+                result = list(run_playlist([ex], setup_manager=setup_manager))[0]
+                grade = result.grade
+                assert isinstance(grade, GameTickPacketWrapperGrader.WrappedPass) or isinstance(grade, GameTickPacketWrapperGrader.WrappedFail), f'Unexpected grade: {grade}'
+                duration_seconds = grade.last_tick.game_info.seconds_elapsed - grade.first_tick.game_info.seconds_elapsed
+                logger.debug(f'intermediate result: {duration_seconds}')
+                return duration_seconds
+            result = naive_function_minimization(time_to_goal, .4, 9)
 
-        result = naive_function_minimization(f, .4, 10)
-        print('Best steering_coefficient: ', result.best_input)
-        print('all_samples:')
+        logger.debug('Best steering_coefficient: ', result.best_input)
+        logger.debug('all_samples:')
         for k,v in sorted(result.all_samples.items()):
-            print(f'{k}\t{v}')
+            logger.debug(f'{k},{v}')
+        self.assertLess(0.4, result.best_input)
+        self.assertLess(1.0, result.best_output)
+        self.assertLess(result.best_output, 4.0)
 
 def make_default_playlist():
     return [TurnAndDriveToBall(name='Turn to ball', steering_coefficient=4.)]
