@@ -105,18 +105,24 @@ class TweakTest(unittest.TestCase):
     def test_on_briefing_tweak(self):
         logger = get_logger('steering optimization')
         # We want to assert that this constant is better than other constants.
-        ex = TurnAndDriveToBall(name='Turn to ball', steering_coefficient=4)
 
         def f(steering_coefficient: float) -> float:
+            ex = TurnAndDriveToBall(
+                name=f'Turn to ball (steering_coefficient={steering_coefficient}',
+                steering_coefficient=steering_coefficient
+            )
             result = list(run_playlist([ex]))[0]
             grade = result.grade
             assert isinstance(grade, GameTickPacketWrapperGrader.WrappedPass) or isinstance(grade, GameTickPacketWrapperGrader.WrappedFail), f'Unexpected grade: {grade}'
             duration_seconds = grade.last_tick.game_info.seconds_elapsed - grade.first_tick.game_info.seconds_elapsed
-            logger.info('intermediate result: ', duration_seconds)
+            logger.info(f'intermediate result: {duration_seconds}')
             return duration_seconds
 
         result = naive_function_minimization(f, .4, 10)
-        print('Best', result)
+        print('Best steering_coefficient: ', result.best_input)
+        print('all_samples:')
+        for k,v in sorted(result.all_samples.items()):
+            print(f'{k}\t{v}')
 
 def make_default_playlist():
     return [TurnAndDriveToBall(name='Turn to ball', steering_coefficient=4.)]
