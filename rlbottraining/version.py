@@ -1,8 +1,12 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.3.4'
+__version__ = '0.4.1'
 
 release_notes = {
+    '0.4.1': '''
+        - Added an `on_briefing` phase to provide parameters to bots using matchcomms - DomNomNom
+    ''',
+
     '0.3.4': '''
         - Added a website to summarize past runs - DomNomNom
         - Made this website pick up live changes (code and results) - DomNomNom
