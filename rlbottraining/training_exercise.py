@@ -21,7 +21,7 @@ class TrainingExercise(Metric):
     _matchcomms: Optional[MatchcommsClient] = None
     matchcomms_factory: Callable[[], MatchcommsClient] = None  # Initialized externally.
     def get_matchcomms(self) -> MatchcommsClient:
-        if not self._matchcomms:
+        if (not self._matchcomms) or (not self._matchcomms.thread.is_alive()):
             assert self.matchcomms_factory
             self._matchcomms = self.matchcomms_factory()
         return self._matchcomms
