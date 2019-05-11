@@ -1,11 +1,12 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 
 release_notes = {
-    '0.4.2': '''
+    '0.4.3': '''
         - Added an `on_briefing` phase to provide parameters to bots using matchcomms - DomNomNom
         - Fix trying to use a closed matchcomms - DomNomNom
+        - Checked the assumption that graders are always reset due to exercises being used once - DomNomNom
     ''',
 
     '0.3.4': '''

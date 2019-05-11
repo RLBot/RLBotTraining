@@ -6,7 +6,7 @@ import numpy as np
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 from rlbot.matchcomms.common_uses.set_attributes_message import make_set_attributes_message
 from rlbot.matchcomms.common_uses.reply import send_and_wait_for_replies
-from rlbot.training.training import Grade, Pass, Fail
+from rlbot.training.training import Grade, Pass, Fail, FailDueToExerciseException
 from rlbot.matchconfig.match_config import MatchConfig
 from rlbot.utils.logging_utils import get_logger
 from rlbot.setup_manager import setup_manager_context
@@ -127,6 +127,14 @@ class TweakTest(unittest.TestCase):
         self.assertLess(0.4, result.best_input)
         self.assertLess(1.0, result.best_output)
         self.assertLess(result.best_output, 4.0)
+
+    def test_use_once(self):
+        ex = TurnAndDriveToBall(name='Turn to ball', steering_coefficient=4.)
+        results = list(run_playlist([ex, ex]))
+        self.assertEqual(len(results), 2)
+        self.assertIsInstance(results[0].grade, Pass)
+        self.assertIsInstance(results[1].grade, FailDueToExerciseException)
+        self.assertTrue('meant to be used once', str(results[1].grade.exception))
 
 def make_default_playlist():
     return [TurnAndDriveToBall(name='Turn to ball', steering_coefficient=4.)]

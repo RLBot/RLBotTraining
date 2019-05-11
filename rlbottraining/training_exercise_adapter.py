@@ -32,6 +32,7 @@ class TrainingExerciseAdapter(RLBotExercise):
         assert isinstance(exercise.match_config, MatchConfig)
         self.exercise = exercise
         self.training_tick_packet = TrainingTickPacket()
+        self.is_first_use = True  # Whether this exercise has been started before.
 
     def get_name(self) -> str:
         return self.exercise.name
@@ -49,6 +50,11 @@ class TrainingExerciseAdapter(RLBotExercise):
         return self.exercise.grader.on_tick(self.training_tick_packet)
 
     def on_briefing(self) -> Optional[Grade]:
+        # Note: Another way to ensure graders are reset which does not require reconstruction of the rest of the exercise
+        # is to use a factory method rather than a property to construct the Grader.
+        # However this would require changing the interface.
+        assert self.is_first_use, "Exercises are meant to be used once such that their graders are guaranteed to be fully reset each time."
+        self.is_first_use = False
         return self.exercise.on_briefing()
 
     def set_matchcomms_factory(self, matchcomms_factory: Callable[[], MatchcommsClient]):
