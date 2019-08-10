@@ -39,8 +39,8 @@ class VersusLineGoalie(TrainingExercise):
                         rotation=Rotator(0, -pi / 2, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
-                    jumped=False,
-                    double_jumped=False,
+                    # jumped=False,
+                    # double_jumped=False,
                     boost_amount=100),
                 # Goalie
                 1: CarState(
@@ -49,8 +49,8 @@ class VersusLineGoalie(TrainingExercise):
                         rotation=Rotator(0, rng.uniform(-.1, .1), 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
-                    jumped=True,
-                    double_jumped=True,
+                    # jumped=True,
+                    # double_jumped=True,
                     boost_amount=100),
             },
             boosts={i: BoostState(0) for i in range(34)},
@@ -74,8 +74,8 @@ class SecondShot(VersusLineGoalie):
                         rotation=Rotator(0, -pi / 2, 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
-                    jumped=False,
-                    double_jumped=False,
+                    # jumped=False,
+                    # double_jumped=False,
                     boost_amount=100),
                 # Goalie
                 1: CarState(
@@ -84,8 +84,8 @@ class SecondShot(VersusLineGoalie):
                         rotation=Rotator(0, rng.uniform(-.1, .1), 0),
                         velocity=Vector3(0, 0, 0),
                         angular_velocity=Vector3(0, 0, 0)),
-                    jumped=True,
-                    double_jumped=True,
+                    # jumped=True,
+                    # double_jumped=True,
                     boost_amount=100),
             },
             boosts={i: BoostState(0) for i in range(34)},

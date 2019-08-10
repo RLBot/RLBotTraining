@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from math import pi
 
-from rlbot.utils.game_state_util import GameState, BallState, CarState, Physics, Vector3, Rotator
-
 from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
 
 from rlbottraining.common_exercises.common_base_exercises import GoalieExercise

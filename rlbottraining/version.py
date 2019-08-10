@@ -1,8 +1,11 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.4.3'
+__version__ = '0.5.0'
 
 release_notes = {
+    '0.5.0': '''
+        - Allowed rendering to be disabled via and argument. - DomNomNom
+    ''',
     '0.4.3': '''
         - Added an `on_briefing` phase to provide parameters to bots using matchcomms - DomNomNom
         - Fix trying to use a closed matchcomms - DomNomNom
