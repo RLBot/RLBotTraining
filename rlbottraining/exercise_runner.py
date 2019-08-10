@@ -5,11 +5,13 @@ import importlib
 import time
 import traceback
 from contextlib import contextmanager
+from enum import Enum
 
 from rlbot.setup_manager import SetupManager, setup_manager_context
 from rlbot.training.training import run_exercises as rlbot_run_exercises
-from rlbot.utils.logging_utils import get_logger
 from rlbot.utils.class_importer import load_external_module
+from rlbot.utils.logging_utils import get_logger
+from rlbot.utils.rendering.rendering_manager import DummyRenderer
 
 from rlbottraining.training_exercise import TrainingExercise, Playlist
 from rlbottraining.training_exercise_adapter import TrainingExerciseAdapter
@@ -17,11 +19,27 @@ from rlbottraining.history.exercise_result import ExerciseResult, ReproductionIn
 
 LOGGER_ID = 'training'
 
-def run_playlist(playlist: Playlist, seed: int = 4, setup_manager: Optional[SetupManager]=None) -> Iterator[ExerciseResult]:
+class RenderPolicy(Enum):
+    DEFAULT = 1  # Lets exercises draw and renders a list of exercises
+    NO_TRAINING_RENDER = 2  # Disables rendering of listing of exercises and rendering that exercises do.
+
+# Mutates setup_manager by optionally stubbing out its renderer.
+def apply_render_policy(render_policy: RenderPolicy, setup_manager: SetupManager):
+    if render_policy == RenderPolicy.DEFAULT:
+        return
+    elif render_policy == RenderPolicy.NO_TRAINING_RENDER:
+        setup_manager.game_interface.renderer = DummyRenderer(setup_manager.game_interface.renderer)
+    else:
+        assert False, 'render policy not handled for ' + repr(render_policy)
+
+
+def run_playlist(playlist: Playlist, seed: int = 4, setup_manager: Optional[SetupManager]=None,
+    render_policy=RenderPolicy.DEFAULT) -> Iterator[ExerciseResult]:
     """
     This function runs the given exercises in the playlist once and returns the result for each.
     """
     with use_or_create(setup_manager, setup_manager_context) as setup_manager:
+        apply_render_policy(render_policy, setup_manager)
         wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
 
         for i, rlbot_result in enumerate(rlbot_run_exercises(setup_manager, wrapped_exercises, seed)):
@@ -47,7 +65,8 @@ class ReloadPolicy:
     EACH_EXERCISE = 2
     # TODO: on .py file change in (sub-) directory
 
-def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = None, reload_policy=ReloadPolicy.EACH_EXERCISE):
+def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = None,
+    reload_policy=ReloadPolicy.EACH_EXERCISE, render_policy=RenderPolicy.DEFAULT):
     """
     This function repeatedly runs exercises in the module and reloads the module to pick up
     any new changes to the Exercise. e.g. make_game_state() can be updated or
@@ -67,6 +86,7 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
 
     log = get_logger(LOGGER_ID)
     with setup_manager_context() as setup_manager:
+        apply_render_policy(render_policy, setup_manager)
         for seed in infinite_seed_generator():
             playlist = playlist_factory()
             wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
