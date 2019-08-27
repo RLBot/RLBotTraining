@@ -1,10 +1,11 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 
 release_notes = {
-    '0.5.0': '''
+    '0.5.1': '''
         - Allowed rendering to be disabled via and argument. - DomNomNom
+        - Version bump to fix encoding errors in the linkuru challenge. - DomNomNom
     ''',
     '0.4.3': '''
         - Added an `on_briefing` phase to provide parameters to bots using matchcomms - DomNomNom
