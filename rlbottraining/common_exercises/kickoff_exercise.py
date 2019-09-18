@@ -34,6 +34,12 @@ class KickoffExercise(TrainingExercise):
     grader: Grader = field(default_factory=QuickResetKickoffGrader)
     spawns: List[SpawnLocation] = field(default_factory=list)
 
+    def on_briefing(self):
+        """Sends a match comm to let your bot know a new kickoff is starting."""
+        _ = send_and_wait_for_replies(self.get_matchcomms(), [
+            make_set_attributes_message(0, {'kickoff': True}),
+        ])
+
     def make_game_state(self, rng: SeededRandomNumberGenerator) -> GameState:
 
         num_players = self.match_config.num_players
