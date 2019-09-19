@@ -113,7 +113,7 @@ def make_default_playlist() -> Playlist:
     ]
 
     for ex in exercises:
-        # The length of players in the match_config needs to match the number or spawns.
+        # The number of players in the match_config needs to match the number of spawns.
 
         # Replace with path to your bot or bots. 
         ex.match_config.player_configs = \
