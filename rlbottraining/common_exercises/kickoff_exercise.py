@@ -75,7 +75,9 @@ class KickoffExercise(TrainingExercise):
 
         car_states = {}
         for i, player in enumerate(self.match_config.player_configs):
-            assert (player.team == BLUE) == (i < len(self.blue_spawns)), "blue/orange players in matchconfig doesn't match the blue/orange spawns. expected {} blue player_configs, followed by {} orange ones.".format(len(self.blue_spawns), len(self.orange_spawns))
+            assert (player.team == BLUE) == (i < len(self.blue_spawns)), \
+            f"Blue/Orange players in match_config don't match the Blue/Orange spawns: Expected {len(self.blue_spawns)} blue player_configs, followed by {len(self.orange_spawns)} orange ones."
+            
             car_states[index] = CarState(
                 boost_amount=33,
                 physics=Physics(
@@ -115,7 +117,7 @@ def make_default_playlist() -> Playlist:
     for ex in exercises:
         # The number of players in the match_config needs to match the number of spawns.
 
-        # Replace with path to your bot or bots. 
+        # Replace with path to your bot. 
         ex.match_config.player_configs = \
         [PlayerConfig.bot_config(BotConfigs.simple_bot, Team.BLUE) for _ in ex.blue_spawns] + \
         [PlayerConfig.bot_config(BotConfigs.simple_bot, Team.ORANGE) for _ in ex.orange_spawns]
