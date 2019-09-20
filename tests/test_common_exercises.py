@@ -122,7 +122,7 @@ class CommonExercisesTest(unittest.TestCase):
         )
 
     def test_kickoff(self):
-        from rlbottraining.common_exercises.kickoff_exercise import KickoffExercise
+        from rlbottraining.common_exercises.kickoff_exercise import make_default_playlist
         self.assertGrades(
             run_playlist(make_default_playlist()),
             # There are five kickoffs, one for each position, in the default playlist.
