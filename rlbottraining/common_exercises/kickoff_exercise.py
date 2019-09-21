@@ -74,8 +74,8 @@ class KickoffExercise(TrainingExercise):
         assert num_players == len(self.spawns), 'Number of players does not match the number of spawns.'
 
         car_states = {}
-        for i, player in enumerate(self.match_config.player_configs):
-            assert (player.team == BLUE) == (i < len(self.blue_spawns)), \
+        for index, player in enumerate(self.match_config.player_configs):
+            assert (player.team == 0) == (index < len(self.blue_spawns)), \
             f"Blue/Orange players in match_config don't match the Blue/Orange spawns: Expected {len(self.blue_spawns)} blue player_configs, followed by {len(self.orange_spawns)} orange ones."
             
             car_states[index] = CarState(

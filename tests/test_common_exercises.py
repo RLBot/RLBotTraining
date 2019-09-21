@@ -124,7 +124,7 @@ class CommonExercisesTest(unittest.TestCase):
         self.assertGrades(
             run_playlist(make_default_playlist()),
             # There are five kickoffs, one for each position, in the default playlist.
-            ['PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall']
+            ['PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall']
         )
 
     # # Commented out because RLBot has a bug where it doesn't like chaning the number of players.
