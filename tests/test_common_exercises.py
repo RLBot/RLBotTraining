@@ -7,11 +7,9 @@ import unittest
 
 from rlbot.training.training import Pass, Fail, FailDueToExerciseException
 
-from rlbot.training.training import Grade
 from rlbottraining.common_graders.timeout import FailOnTimeout
 from rlbottraining.exercise_runner import run_playlist
 from rlbottraining.history.exercise_result import ExerciseResult
-from rlbottraining.paths import _common_exercises_dir
 
 class CommonExercisesTest(unittest.TestCase):
     '''
