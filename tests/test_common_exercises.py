@@ -7,11 +7,9 @@ import unittest
 
 from rlbot.training.training import Pass, Fail, FailDueToExerciseException
 
-from rlbot.training.training import Grade
 from rlbottraining.common_graders.timeout import FailOnTimeout
 from rlbottraining.exercise_runner import run_playlist
 from rlbottraining.history.exercise_result import ExerciseResult
-from rlbottraining.paths import _common_exercises_dir
 
 class CommonExercisesTest(unittest.TestCase):
     '''
@@ -119,6 +117,14 @@ class CommonExercisesTest(unittest.TestCase):
         self.assertGrades(
             run_playlist(make_default_playlist()),
             ['FailDueToTimeout']
+        )
+
+    def test_kickoff(self):
+        from rlbottraining.common_exercises.kickoff_exercise import make_default_playlist
+        self.assertGrades(
+            run_playlist(make_default_playlist()),
+            # There are five kickoffs, one for each position, in the default playlist.
+            ['PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall','PassDueToMovedBall']
         )
 
     # # Commented out because RLBot has a bug where it doesn't like chaning the number of players.

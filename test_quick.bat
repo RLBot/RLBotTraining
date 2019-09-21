@@ -6,3 +6,4 @@ tests.test_metrics ^
 tests.test_grading ^
 tests.test_dataclasses ^
 tests.test_run_module_stubbed ^
+tests.test_common_exercises_quick ^
