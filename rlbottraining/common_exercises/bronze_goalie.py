@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from math import pi
 
-from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
+from rlbot.utils.game_state_util import GameState, BallState, CarState, Physics, Vector3, Rotator
 
 from rlbottraining.common_exercises.common_base_exercises import GoalieExercise
 from rlbottraining.rng import SeededRandomNumberGenerator
 from rlbottraining.training_exercise import Playlist
+
 
 @dataclass
 class BallRollingToGoalie(GoalieExercise):
@@ -27,8 +28,8 @@ class BallRollingToGoalie(GoalieExercise):
                     double_jumped=False,
                     boost_amount=0)
             },
-            boosts={i: BoostState(0) for i in range(34)},
         )
+
 
 def make_default_playlist() -> Playlist:
     return [

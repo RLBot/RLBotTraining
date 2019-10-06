@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from math import pi
 
-from rlbot.utils.game_state_util import GameState, BoostState, BallState, CarState, Physics, Vector3, Rotator
+from rlbot.utils.game_state_util import GameState, BallState, CarState, Physics, Vector3, Rotator
 
 from rlbottraining.common_exercises.common_base_exercises import GoalieExercise
 from rlbottraining.rng import SeededRandomNumberGenerator
@@ -28,7 +28,6 @@ class DefendBallRollingTowardsGoal(GoalieExercise):
                     boost_amount=87),
                 1: CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
             },
-            boosts={i: BoostState(0) for i in range(34)},
         )
 
 
@@ -52,7 +51,6 @@ class LineSave(GoalieExercise):
                     boost_amount=87),
                 1: CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
             },
-            boosts={i: BoostState(0) for i in range(34)},
         )
 
 
@@ -76,7 +74,6 @@ class TryNotToOwnGoal(GoalieExercise):
                     boost_amount=0),
                 1: CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
             },
-            boosts={i: BoostState(0) for i in range(34)},
         )
 
 

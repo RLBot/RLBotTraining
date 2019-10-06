@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from math import pi
 
-from rlbot.utils.game_state_util import BoostState
 from rlbot.utils.game_state_util import GameState, BallState, CarState, Physics, Vector3, Rotator
 
 from rlbottraining.common_exercises.common_base_exercises import StrikerExercise
@@ -29,7 +28,6 @@ class HookShot(StrikerExercise):
                     boost_amount=87),
                 1: CarState(physics=Physics(location=Vector3(10000, 10000, 10000)))
             },
-            boosts={i: BoostState(0) for i in range(34)},
         )
 
 
