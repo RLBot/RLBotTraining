@@ -1,8 +1,13 @@
 # https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 
-__version__ = '0.5.1'
+__version__ = '0.6.0'
 
 release_notes = {
+    '0.6.0': '''
+        - New kickoff training added. - ViliamVadocz
+        - Added fast test for all common exercises. - DomNomNom
+        - Updates to common exercises. - jeroen11dijk, tarehart
+    ''',
     '0.5.1': '''
         - Allowed rendering to be disabled via and argument. - DomNomNom
         - Version bump to fix encoding errors in the linkuru challenge. - DomNomNom
