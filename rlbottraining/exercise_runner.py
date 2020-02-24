@@ -90,7 +90,8 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
         for seed in infinite_seed_generator():
             playlist = playlist_factory()
             wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
-            result_iter = rlbot_run_exercises(setup_manager, wrapped_exercises, seed)
+            reload_agent = reload_policy != ReloadPolicy.NEVER
+            result_iter = rlbot_run_exercises(setup_manager, wrapped_exercises, seed, reload_agent)
 
             for i, rlbot_result in enumerate(result_iter):
                 result = ExerciseResult(
