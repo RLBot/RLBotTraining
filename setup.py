@@ -18,7 +18,7 @@ setuptools.setup(
     name='rlbottraining',
     packages=setuptools.find_packages(),
     install_requires=[
-        'rlbot>=1.25.0',
+        'rlbot>=1.36.2',
         'docopt',
         'watchdog',
         'numpy',
