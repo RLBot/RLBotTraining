@@ -68,9 +68,10 @@ class ReloadPolicy:
 def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = None,
     reload_policy=ReloadPolicy.EACH_EXERCISE, render_policy=RenderPolicy.DEFAULT):
     """
-    This function repeatedly runs exercises in the module and reloads the module to pick up
-    any new changes to the Exercise. e.g. make_game_state() can be updated or
+    This function repeatedly runs exercises in the module and reloads the module and the agent to pick up
+    any new changes. e.g. make_game_state() can be updated or
     you could implement a new Grader without needing to terminate the training.
+    If the reload_policy is set to ReloadPolicy.NEVER, exercise and the agent will stop reloading on each exercise.
     """
 
     # load the playlist initially, keep trying if we fail
@@ -90,7 +91,8 @@ def run_module(python_file_with_playlist: Path, history_dir: Optional[Path] = No
         for seed in infinite_seed_generator():
             playlist = playlist_factory()
             wrapped_exercises = [TrainingExerciseAdapter(ex) for ex in playlist]
-            result_iter = rlbot_run_exercises(setup_manager, wrapped_exercises, seed)
+            reload_agent = reload_policy != ReloadPolicy.NEVER
+            result_iter = rlbot_run_exercises(setup_manager, wrapped_exercises, seed, reload_agent=reload_agent)
 
             for i, rlbot_result in enumerate(result_iter):
                 result = ExerciseResult(
