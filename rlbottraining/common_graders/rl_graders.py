@@ -36,12 +36,7 @@ class RocketLeagueStrikerGrader(CompoundGrader):
 
     def on_tick(self, tick: TrainingTickPacket) -> Optional[Grade]:
         grades = [grader.on_tick(tick) for grader in self.graders]
-        return self.grade_chooser(grades)
-
-    def grade_chooser(self, grades) -> Optional[Grade]:
-        """
-        Chooses the importance of the grades
-        """
+        # Choose the importance of the grades.
 
         timeout = isinstance(grades[2], Fail)  # True if timed out, false otherwise
         ball_on_ground = isinstance(grades[1], Fail)  # True if ball touched the ground, false otherwise
@@ -115,9 +110,6 @@ class FailOnBallOnGround(Grader):
                     This will not hold true if the ball is being pushed on the ground by a bot.
                     Todo: detect pushing from bot
                     '''
-                    print('INFO')
-                    print(packet.game_ball.latest_touch.time_seconds)
-                    print(packet.game_info.seconds_elapsed - (2/60))
 
                     if packet.game_ball.latest_touch.time_seconds >= (packet.game_info.seconds_elapsed - (2/60)):
                         '''
